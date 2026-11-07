@@ -1,6 +1,4 @@
-from flask import Blueprint
+"""Expose the farmer blueprint and register its view modules."""
 
-
-farmer_bp = Blueprint("farmer", __name__, url_prefix="/farmer")
-
+from app.blueprints.farmer.blueprint import farmer_bp
 from app.blueprints.farmer import routes

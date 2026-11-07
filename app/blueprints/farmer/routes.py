@@ -1,3 +1,5 @@
+"""Farmer diagnosis, history, disease information, and private upload views."""
+
 import sqlite3
 from pathlib import Path
 
@@ -15,8 +17,9 @@ from flask import (
 from werkzeug.exceptions import RequestEntityTooLarge
 
 from app.blueprints.auth.routes import roles_required
-from app.blueprints.farmer import farmer_bp
+from app.blueprints.farmer.blueprint import farmer_bp
 from app.database import get_db
+from app.services.diagnosis_service import get_diagnosis_symptoms
 from app.services.inference_engine import InferenceResult, infer_disease
 from app.services.upload_service import UploadValidationError, save_crop_image
 
@@ -24,6 +27,7 @@ from app.services.upload_service import UploadValidationError, save_crop_image
 @farmer_bp.get("/dashboard")
 @roles_required("farmer")
 def dashboard():
+    """Display the current farmer and their latest diagnosis summary."""
     connection = get_db()
     user_id = int(g.user["id"])
     diagnosis_count = connection.execute(
@@ -56,6 +60,7 @@ def dashboard():
 @farmer_bp.get("/crops")
 @roles_required("farmer")
 def crops():
+    """List active crops available for farmer diagnosis."""
     available_crops = get_db().execute(
         """
         SELECT slug, name, description, logo_filename
@@ -70,6 +75,7 @@ def crops():
 @farmer_bp.route("/crops/<crop_slug>", methods=["GET", "POST"])
 @roles_required("farmer")
 def crop_diagnosis(crop_slug: str):
+    """Validate selected symptoms, optionally store a photo, and save a diagnosis."""
     connection = get_db()
     crop = connection.execute(
         """
@@ -228,6 +234,7 @@ def _save_diagnosis(
 @farmer_bp.get("/diagnoses/<int:diagnosis_id>")
 @roles_required("farmer")
 def diagnosis_result(diagnosis_id: int):
+    """Display diagnosis evidence only for its owning farmer."""
     connection = get_db()
     diagnosis = connection.execute(
         """
@@ -242,16 +249,7 @@ def diagnosis_result(diagnosis_id: int):
     if diagnosis is None:
         abort(404)
 
-    selected_symptoms = connection.execute(
-        """
-        SELECT s.label
-        FROM diagnosis_symptoms AS ds
-        JOIN symptoms AS s ON s.id = ds.symptom_id
-        WHERE ds.diagnosis_id = ?
-        ORDER BY s.label COLLATE NOCASE
-        """,
-        (diagnosis_id,),
-    ).fetchall()
+    selected_symptoms = get_diagnosis_symptoms(connection, diagnosis_id)
     candidate_rows = connection.execute(
         """
         SELECT dc.disease_id, dc.rank, dc.match_score, dc.confidence_level,
@@ -310,6 +308,7 @@ def diagnosis_result(diagnosis_id: int):
 @farmer_bp.get("/history")
 @roles_required("farmer")
 def history():
+    """List the current farmer's previous diagnoses."""
     diagnoses = get_db().execute(
         """
         SELECT d.id, d.outcome, d.confidence_level, d.created_at, d.image_path,
@@ -330,6 +329,7 @@ def history():
 @farmer_bp.get("/diagnoses/<int:diagnosis_id>/image")
 @roles_required("farmer")
 def diagnosis_image(diagnosis_id: int):
+    """Serve a private image only after checking diagnosis ownership."""
     diagnosis = get_db().execute(
         """
         SELECT image_path
@@ -357,6 +357,7 @@ def diagnosis_image(diagnosis_id: int):
 @farmer_bp.get("/diseases/<disease_slug>")
 @roles_required("farmer")
 def disease_detail(disease_slug: str):
+    """Display an active disease and its treatment and reference information."""
     connection = get_db()
     disease = connection.execute(
         """
@@ -410,5 +411,6 @@ def disease_detail(disease_slug: str):
 
 @farmer_bp.errorhandler(RequestEntityTooLarge)
 def upload_too_large(_error):
+    """Explain the request-size limit using the farmer upload error page."""
     flash("Images must be no larger than 5 MB.", "danger")
     return render_template("errors/413.html"), 413

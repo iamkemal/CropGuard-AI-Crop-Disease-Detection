@@ -1,6 +1,7 @@
+"""Verify upload validation, supported formats, and safe image storage."""
+
 import tempfile
 import unittest
-from contextlib import closing
 from io import BytesIO
 from pathlib import Path
 
@@ -11,11 +12,13 @@ from app.services.upload_service import UploadValidationError, save_crop_image
 
 
 class CropImageUploadTests(unittest.TestCase):
+    """Verify safe image decoding, validation, naming, and re-encoding."""
     def create_image_upload(
         self,
         image_format: str = "PNG",
         filename: str = "plant.png",
     ) -> FileStorage:
+        """Create an in-memory file upload in the requested image format."""
         image_data = BytesIO()
         Image.new("RGB", (40, 30), color=(30, 120, 55)).save(
             image_data,
@@ -25,6 +28,7 @@ class CropImageUploadTests(unittest.TestCase):
         return FileStorage(stream=image_data, filename=filename)
 
     def test_saves_valid_image_using_generated_name_and_reencodes_it(self) -> None:
+        """Verify valid uploads are re-encoded and stored under generated names."""
         with tempfile.TemporaryDirectory() as temporary_directory:
             saved_name = save_crop_image(
                 self.create_image_upload(),
@@ -38,6 +42,7 @@ class CropImageUploadTests(unittest.TestCase):
                 self.assertEqual(saved_image.size, (40, 30))
 
     def test_accepts_each_supported_raster_format(self) -> None:
+        """Verify JPEG, PNG, and WEBP uploads retain their supported formats."""
         image_variants = (
             ("JPEG", "field.jpg"),
             ("JPEG", "field.jpeg"),
@@ -55,6 +60,7 @@ class CropImageUploadTests(unittest.TestCase):
                         self.assertEqual(image.format, image_format)
 
     def test_rejects_unsupported_extensions(self) -> None:
+        """Verify unsupported image filename extensions are rejected."""
         with tempfile.TemporaryDirectory() as temporary_directory:
             with self.assertRaisesRegex(UploadValidationError, "JPG, JPEG, PNG, or WEBP"):
                 save_crop_image(
@@ -63,6 +69,7 @@ class CropImageUploadTests(unittest.TestCase):
                 )
 
     def test_rejects_content_that_does_not_match_its_extension(self) -> None:
+        """Verify decoded image content must agree with its filename extension."""
         with tempfile.TemporaryDirectory() as temporary_directory:
             with self.assertRaisesRegex(UploadValidationError, "does not match"):
                 save_crop_image(
@@ -71,6 +78,7 @@ class CropImageUploadTests(unittest.TestCase):
                 )
 
     def test_rejects_corrupt_image_data(self) -> None:
+        """Verify corrupt image uploads leave the destination directory empty."""
         with tempfile.TemporaryDirectory() as temporary_directory:
             corrupt_upload = FileStorage(
                 stream=BytesIO(b"not an image"),

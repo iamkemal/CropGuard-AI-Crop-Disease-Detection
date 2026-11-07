@@ -1,12 +1,18 @@
+"""Build the Flask application and register its views and management commands."""
+
 import secrets
 import sqlite3
 from pathlib import Path
+from re import fullmatch
 
 import click
-from flask import Flask, abort, render_template
+from flask import Flask, render_template
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash
 
+from app.blueprints.admin import admin_bp
+from app.blueprints.auth import auth_bp
+from app.blueprints.farmer import farmer_bp
 from app.database import get_db, init_app as init_database_app
 from app.database.seed import initialize_database
 
@@ -15,6 +21,7 @@ csrf = CSRFProtect()
 
 
 def create_app(test_config: dict | None = None) -> Flask:
+    """Configure storage, extensions, blueprints, and CLI commands for one app."""
     project_root = Path(__file__).resolve().parent.parent
     instance_path = project_root / "instance"
     app = Flask(
@@ -39,10 +46,6 @@ def create_app(test_config: dict | None = None) -> Flask:
     init_database_app(app)
     csrf.init_app(app)
 
-    from app.blueprints.admin import admin_bp
-    from app.blueprints.auth import auth_bp
-    from app.blueprints.farmer import farmer_bp
-
     app.register_blueprint(auth_bp)
     app.register_blueprint(farmer_bp)
     app.register_blueprint(admin_bp)
@@ -66,8 +69,6 @@ def create_app(test_config: dict | None = None) -> Flask:
 
     @app.cli.command("create-admin")
     def create_admin_command():
-        from re import fullmatch
-
         username = click.prompt("Admin username").strip()
         email = click.prompt("Admin email").strip().lower()
         password = click.prompt(

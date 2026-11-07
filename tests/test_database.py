@@ -1,3 +1,5 @@
+"""Verify seeded SQLite schema integrity and repeatable initialization."""
+
 import sqlite3
 import tempfile
 import unittest
@@ -8,7 +10,9 @@ from app.database.seed import initialize_database
 
 
 class DatabaseInitializationTests(unittest.TestCase):
+    """Verify that schema creation and knowledge-base seeding are repeatable."""
     def test_initialization_creates_seeded_knowledge_base(self) -> None:
+        """Verify schema creation seeds the expected records with valid foreign keys."""
         with tempfile.TemporaryDirectory() as temporary_directory:
             database_path = Path(temporary_directory) / "test.sqlite3"
             initialize_database(database_path)
@@ -49,6 +53,7 @@ class DatabaseInitializationTests(unittest.TestCase):
                 )
 
     def test_reinitialization_does_not_duplicate_seed_records(self) -> None:
+        """Verify repeated initialization leaves seed record counts unchanged."""
         with tempfile.TemporaryDirectory() as temporary_directory:
             database_path = Path(temporary_directory) / "test.sqlite3"
             initialize_database(database_path)

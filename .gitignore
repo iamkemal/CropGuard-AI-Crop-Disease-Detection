@@ -3,3 +3,10 @@ __pycache__/
 .venv/
 venv/
 instance/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+.coverage
+htmlcov/
+*.log

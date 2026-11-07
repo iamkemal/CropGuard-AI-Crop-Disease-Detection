@@ -1,3 +1,5 @@
+"""Expose the Flask application and start its local development server."""
+
 from app import create_app
 
 

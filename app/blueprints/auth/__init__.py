@@ -1,6 +1,4 @@
-from flask import Blueprint
+"""Expose the auth blueprint and register its view modules."""
 
-
-auth_bp = Blueprint("auth", __name__)
-
+from app.blueprints.auth.blueprint import auth_bp
 from app.blueprints.auth import routes

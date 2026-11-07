@@ -1,6 +1,4 @@
-from flask import Blueprint
+"""Expose the admin blueprint and register its view modules."""
 
-
-admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
-
-from app.blueprints.admin import routes
+from app.blueprints.admin.blueprint import admin_bp
+from app.blueprints.admin import overview, routes

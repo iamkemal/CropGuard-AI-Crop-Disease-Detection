@@ -1,3 +1,5 @@
+"""Administrator CRUD routes for the crop disease knowledge base."""
+
 import re
 import sqlite3
 from math import isfinite
@@ -10,11 +12,10 @@ from flask import (
     redirect,
     render_template,
     request,
-    send_from_directory,
     url_for,
 )
 
-from app.blueprints.admin import admin_bp
+from app.blueprints.admin.blueprint import admin_bp
 from app.blueprints.auth.routes import roles_required
 from app.database import get_db
 
@@ -96,82 +97,10 @@ def _crop_options():
     ).fetchall()
 
 
-@admin_bp.get("/dashboard")
-@roles_required("admin")
-def dashboard():
-    connection = get_db()
-    counts = {
-        "users": connection.execute(
-            "SELECT COUNT(*) FROM users WHERE role = 'farmer'"
-        ).fetchone()[0],
-        "diseases": connection.execute(
-            "SELECT COUNT(*) FROM diseases WHERE is_active = 1"
-        ).fetchone()[0],
-        "diagnoses": connection.execute(
-            "SELECT COUNT(*) FROM diagnoses"
-        ).fetchone()[0],
-        "rules": connection.execute(
-            "SELECT COUNT(*) FROM rules WHERE is_active = 1"
-        ).fetchone()[0],
-    }
-    return render_template("admin/dashboard.html", counts=counts)
-
-
-@admin_bp.route("/users", methods=["GET"])
-@roles_required("admin")
-def users():
-    records = get_db().execute(
-        """
-        SELECT id, username, email, is_active, created_at
-        FROM users
-        WHERE role = 'farmer'
-        ORDER BY created_at DESC, id DESC
-        """
-    ).fetchall()
-    return render_template("admin/users.html", users=records)
-
-
-@admin_bp.post("/users/<int:user_id>/toggle")
-@roles_required("admin")
-def toggle_user(user_id: int):
-    connection = get_db()
-    user = connection.execute(
-        "SELECT role, is_active FROM users WHERE id = ?",
-        (user_id,),
-    ).fetchone()
-    if user is None or user["role"] != "farmer":
-        abort(404)
-    connection.execute(
-        "UPDATE users SET is_active = ? WHERE id = ?",
-        (0 if user["is_active"] else 1, user_id),
-    )
-    connection.commit()
-    flash("Farmer account status updated.", "success")
-    return redirect(url_for("admin.users"))
-
-
-@admin_bp.post("/users/<int:user_id>/delete")
-@roles_required("admin")
-def delete_user(user_id: int):
-    connection = get_db()
-    user = connection.execute(
-        "SELECT role FROM users WHERE id = ?",
-        (user_id,),
-    ).fetchone()
-    if user is None or user["role"] != "farmer":
-        abort(404)
-    connection.execute("DELETE FROM users WHERE id = ?", (user_id,))
-    connection.commit()
-    flash(
-        "Farmer account deleted. Its diagnosis history remains and is anonymized.",
-        "success",
-    )
-    return redirect(url_for("admin.users"))
-
-
 @admin_bp.route("/crops", methods=["GET", "POST"])
 @roles_required("admin")
 def crops():
+    """List crops and validate administrator requests to create a crop."""
     connection = get_db()
     if request.method == "POST":
         try:
@@ -217,6 +146,7 @@ def _validate_logo(filename: str) -> None:
 @admin_bp.route("/crops/<int:crop_id>/edit", methods=["GET", "POST"])
 @roles_required("admin")
 def edit_crop(crop_id: int):
+    """Validate and save changes to an existing crop."""
     connection = get_db()
     crop = connection.execute(
         "SELECT * FROM crops WHERE id = ?",
@@ -258,6 +188,7 @@ def edit_crop(crop_id: int):
 @admin_bp.post("/crops/<int:crop_id>/delete")
 @roles_required("admin")
 def delete_crop(crop_id: int):
+    """Delete an unused crop while protecting referenced records."""
     connection = get_db()
     try:
         cursor = connection.execute("DELETE FROM crops WHERE id = ?", (crop_id,))
@@ -278,6 +209,7 @@ def delete_crop(crop_id: int):
 @admin_bp.get("/diseases")
 @roles_required("admin")
 def diseases():
+    """List the stored diseases with their crop and symptom information."""
     records = get_db().execute(
         """
         SELECT d.id, d.slug, d.name, d.scientific_name, d.is_active,
@@ -329,11 +261,10 @@ def _disease_form_data(disease=None):
 def _store_disease(disease_id: int | None = None) -> None:
     connection = get_db()
     crop_id = _integer("crop_id", "Crop", 1, 2_147_483_647)
-    crop = connection.execute(
+    if connection.execute(
         "SELECT id FROM crops WHERE id = ? AND is_active = 1",
         (crop_id,),
-    ).fetchone()
-    if crop is None:
+    ).fetchone() is None:
         raise ValueError("Choose an active crop.")
     slug = _slug()
     name = _text("name", "Disease name", 120)
@@ -425,6 +356,7 @@ def _store_disease(disease_id: int | None = None) -> None:
 @admin_bp.route("/diseases/new", methods=["GET", "POST"])
 @roles_required("admin")
 def new_disease():
+    """Validate and create a disease and its symptom associations."""
     if request.method == "POST":
         try:
             _store_disease()
@@ -444,6 +376,7 @@ def new_disease():
 @admin_bp.route("/diseases/<int:disease_id>/edit", methods=["GET", "POST"])
 @roles_required("admin")
 def edit_disease(disease_id: int):
+    """Validate and update an existing disease and its symptom associations."""
     disease = get_db().execute(
         "SELECT * FROM diseases WHERE id = ?",
         (disease_id,),
@@ -472,6 +405,7 @@ def edit_disease(disease_id: int):
 @admin_bp.post("/diseases/<int:disease_id>/delete")
 @roles_required("admin")
 def delete_disease(disease_id: int):
+    """Delete an unused disease while protecting diagnosis and rule references."""
     connection = get_db()
     try:
         cursor = connection.execute(
@@ -495,6 +429,7 @@ def delete_disease(disease_id: int):
 @admin_bp.get("/symptoms")
 @roles_required("admin")
 def symptoms():
+    """List the available symptoms and their associated crops."""
     records = get_db().execute(
         """
         SELECT s.id, s.slug, s.label, s.is_active, c.name AS crop_name
@@ -563,6 +498,7 @@ def _store_symptom(symptom_id: int | None = None) -> None:
 @admin_bp.route("/symptoms/new", methods=["GET", "POST"])
 @roles_required("admin")
 def new_symptom():
+    """Validate and create a symptom for an active crop."""
     if request.method == "POST":
         try:
             _store_symptom()
@@ -586,6 +522,7 @@ def new_symptom():
 @admin_bp.route("/symptoms/<int:symptom_id>/edit", methods=["GET", "POST"])
 @roles_required("admin")
 def edit_symptom(symptom_id: int):
+    """Validate and update an existing symptom."""
     symptom = get_db().execute(
         "SELECT * FROM symptoms WHERE id = ?",
         (symptom_id,),
@@ -615,6 +552,7 @@ def edit_symptom(symptom_id: int):
 @admin_bp.post("/symptoms/<int:symptom_id>/delete")
 @roles_required("admin")
 def delete_symptom(symptom_id: int):
+    """Delete a symptom only when references permit its removal."""
     connection = get_db()
     try:
         cursor = connection.execute(
@@ -778,6 +716,7 @@ def _store_rule(rule_id: int | None = None) -> None:
 @admin_bp.get("/rules")
 @roles_required("admin")
 def rules():
+    """List disease rules and their activation state."""
     records = get_db().execute(
         """
         SELECT r.id, r.code, r.name, r.minimum_matches, r.minimum_score,
@@ -794,6 +733,7 @@ def rules():
 @admin_bp.route("/rules/new", methods=["GET", "POST"])
 @roles_required("admin")
 def new_rule():
+    """Validate and create an IF-THEN rule and its symptom conditions."""
     if request.method == "POST":
         try:
             _store_rule()
@@ -813,6 +753,7 @@ def new_rule():
 @admin_bp.route("/rules/<int:rule_id>/edit", methods=["GET", "POST"])
 @roles_required("admin")
 def edit_rule(rule_id: int):
+    """Validate and save an existing rule and its conditions."""
     rule = get_db().execute(
         "SELECT * FROM rules WHERE id = ?",
         (rule_id,),
@@ -838,6 +779,7 @@ def edit_rule(rule_id: int):
 @admin_bp.post("/rules/<int:rule_id>/delete")
 @roles_required("admin")
 def delete_rule(rule_id: int):
+    """Delete an unused rule or deactivate one needed for diagnosis history."""
     connection = get_db()
     rule = connection.execute(
         "SELECT code FROM rules WHERE id = ?",
@@ -869,6 +811,7 @@ def delete_rule(rule_id: int):
 @admin_bp.get("/treatments")
 @roles_required("admin")
 def treatments():
+    """List disease treatment and prevention recommendations."""
     records = get_db().execute(
         """
         SELECT t.id, t.category, t.recommendation, t.sort_order,
@@ -920,6 +863,7 @@ def _store_treatment(treatment_id: int | None = None) -> None:
 @admin_bp.route("/treatments/new", methods=["GET", "POST"])
 @roles_required("admin")
 def new_treatment():
+    """Validate and create a disease recommendation."""
     if request.method == "POST":
         try:
             _store_treatment()
@@ -954,6 +898,7 @@ def _active_diseases():
 @admin_bp.route("/treatments/<int:treatment_id>/edit", methods=["GET", "POST"])
 @roles_required("admin")
 def edit_treatment(treatment_id: int):
+    """Validate and update an existing disease recommendation."""
     treatment = get_db().execute(
         "SELECT * FROM treatments WHERE id = ?",
         (treatment_id,),
@@ -987,6 +932,7 @@ def edit_treatment(treatment_id: int):
 @admin_bp.post("/treatments/<int:treatment_id>/delete")
 @roles_required("admin")
 def delete_treatment(treatment_id: int):
+    """Delete an existing disease recommendation."""
     connection = get_db()
     cursor = connection.execute(
         "DELETE FROM treatments WHERE id = ?",
@@ -997,148 +943,3 @@ def delete_treatment(treatment_id: int):
     connection.commit()
     flash("Recommendation deleted.", "success")
     return redirect(url_for("admin.treatments"))
-
-
-@admin_bp.get("/diagnoses")
-@roles_required("admin")
-def diagnoses():
-    records = get_db().execute(
-        """
-        SELECT d.id, d.outcome, d.confidence_level, d.created_at, d.image_path,
-               c.name AS crop_name, u.username,
-               candidate.name AS disease_name
-        FROM diagnoses AS d
-        JOIN crops AS c ON c.id = d.crop_id
-        LEFT JOIN users AS u ON u.id = d.user_id
-        LEFT JOIN diagnosis_candidates AS dc
-            ON dc.diagnosis_id = d.id AND dc.rank = 1
-        LEFT JOIN diseases AS candidate ON candidate.id = dc.disease_id
-        ORDER BY d.created_at DESC, d.id DESC
-        LIMIT 200
-        """
-    ).fetchall()
-    return render_template("admin/diagnoses.html", diagnoses=records)
-
-
-@admin_bp.get("/diagnoses/<int:diagnosis_id>")
-@roles_required("admin")
-def diagnosis_detail(diagnosis_id: int):
-    connection = get_db()
-    diagnosis = connection.execute(
-        """
-        SELECT d.id, d.image_path, d.outcome, d.confidence_level, d.explanation,
-               d.created_at, c.name AS crop_name, u.username
-        FROM diagnoses AS d
-        JOIN crops AS c ON c.id = d.crop_id
-        LEFT JOIN users AS u ON u.id = d.user_id
-        WHERE d.id = ?
-        """,
-        (diagnosis_id,),
-    ).fetchone()
-    if diagnosis is None:
-        abort(404)
-    selected_symptoms = connection.execute(
-        """
-        SELECT s.label
-        FROM diagnosis_symptoms AS ds
-        JOIN symptoms AS s ON s.id = ds.symptom_id
-        WHERE ds.diagnosis_id = ?
-        ORDER BY s.label COLLATE NOCASE
-        """,
-        (diagnosis_id,),
-    ).fetchall()
-    candidates = connection.execute(
-        """
-        SELECT dc.rank, dc.match_score, dc.confidence_level, dc.explanation,
-               d.name, d.slug
-        FROM diagnosis_candidates AS dc
-        JOIN diseases AS d ON d.id = dc.disease_id
-        WHERE dc.diagnosis_id = ?
-        ORDER BY dc.rank
-        """,
-        (diagnosis_id,),
-    ).fetchall()
-    return render_template(
-        "admin/diagnosis_detail.html",
-        diagnosis=diagnosis,
-        selected_symptoms=selected_symptoms,
-        candidates=candidates,
-    )
-
-
-@admin_bp.get("/diagnoses/<int:diagnosis_id>/image")
-@roles_required("admin")
-def diagnosis_image(diagnosis_id: int):
-    diagnosis = get_db().execute(
-        "SELECT image_path FROM diagnoses WHERE id = ?",
-        (diagnosis_id,),
-    ).fetchone()
-    if diagnosis is None or not diagnosis["image_path"]:
-        abort(404)
-    filename = diagnosis["image_path"]
-    if Path(filename).name != filename:
-        abort(404)
-    response = send_from_directory(
-        current_app.config["UPLOAD_FOLDER"],
-        filename,
-        conditional=True,
-    )
-    response.headers["Cache-Control"] = "private, no-store"
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    return response
-
-
-@admin_bp.get("/reports")
-@roles_required("admin")
-def reports():
-    connection = get_db()
-    by_crop = connection.execute(
-        """
-        SELECT c.name, COUNT(d.id) AS diagnosis_count
-        FROM crops AS c
-        LEFT JOIN diagnoses AS d ON d.crop_id = c.id
-        GROUP BY c.id
-        ORDER BY c.name COLLATE NOCASE
-        """
-    ).fetchall()
-    by_disease = connection.execute(
-        """
-        SELECT c.name AS crop_name, d.name AS disease_name,
-               COUNT(DISTINCT dc.diagnosis_id) AS diagnosis_count
-        FROM diseases AS d
-        JOIN crops AS c ON c.id = d.crop_id
-        LEFT JOIN diagnosis_candidates AS dc ON dc.disease_id = d.id
-        GROUP BY d.id
-        ORDER BY diagnosis_count DESC, c.name COLLATE NOCASE,
-                 d.name COLLATE NOCASE
-        """
-    ).fetchall()
-    by_outcome = connection.execute(
-        """
-        SELECT outcome, COUNT(*) AS diagnosis_count
-        FROM diagnoses
-        GROUP BY outcome
-        ORDER BY outcome
-        """
-    ).fetchall()
-    summary = {
-        "farmers": connection.execute(
-            "SELECT COUNT(*) FROM users WHERE role = 'farmer'"
-        ).fetchone()[0],
-        "active_farmers": connection.execute(
-            "SELECT COUNT(*) FROM users WHERE role = 'farmer' AND is_active = 1"
-        ).fetchone()[0],
-        "diagnoses": connection.execute(
-            "SELECT COUNT(*) FROM diagnoses"
-        ).fetchone()[0],
-        "images": connection.execute(
-            "SELECT COUNT(*) FROM diagnoses WHERE image_path IS NOT NULL"
-        ).fetchone()[0],
-    }
-    return render_template(
-        "admin/reports.html",
-        summary=summary,
-        by_crop=by_crop,
-        by_disease=by_disease,
-        by_outcome=by_outcome,
-    )

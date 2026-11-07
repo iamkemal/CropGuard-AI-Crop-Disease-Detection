@@ -66,12 +66,16 @@ python -m pip install -r requirements.txt
 
 If PowerShell prevents activation, either allow local activation scripts for your user according to your organization's policy, or invoke the environment interpreter directly as `.\.venv\Scripts\python.exe`.
 
-Configure a persistent secret for local development and initialize the database:
+Set a secret for the current PowerShell session and initialize the database:
 
 ```powershell
 $env:SECRET_KEY = (& python -c "import secrets; print(secrets.token_hex(32))")
 flask --app run init-db
 ```
+
+The `$env:SECRET_KEY` assignment lasts only for this terminal session. Start the
+server from the same terminal. For a stable key across restarts, configure a
+persistent environment variable through your development or hosting environment.
 
 The Flask application factory also initializes the schema and seed records when it starts; `init-db` can be safely run again. Create the first administrator interactively (the password is hidden while entered):
 
@@ -115,6 +119,33 @@ python -m unittest discover -s tests -v
 ```
 
 Tests use temporary databases and upload folders; they do not overwrite the default application database.
+
+### GitHub Actions and local checks
+
+Both workflows use Python 3.12 on Ubuntu 24.04, install the same development
+dependencies, and run on pushes and pull requests to `main`. They can also be
+started manually from the Actions tab.
+
+- **Pylint** checks all tracked Python files. Its default 10/10 score threshold
+  and nonzero failure status are retained.
+- **Python tests** checks syntax and undefined names with Flake8, then runs the
+  full test suite with pytest.
+
+Run the checks locally from the project root, using the activated environment:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+python -m pylint app tests config.py run.py
+python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+python -m pytest -q
+```
+
+Development tool versions are pinned in `requirements-dev.txt` so local and CI
+checks use the same Pylint, pytest, and Flake8 versions. Small, documented Pylint
+exceptions are scoped to data-record fields, Flask's settings container,
+and unittest-managed temporary-directory contexts.
+All other diagnostics remain enabled; neither workflow uses `--exit-zero` or
+`continue-on-error`.
 
 ## Database overview
 

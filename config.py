@@ -1,3 +1,5 @@
+"""Read application configuration from environment variables."""
+
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -7,7 +9,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 INSTANCE_DIR = PROJECT_ROOT / "instance"
 
 
-class Config:
+# Flask reads class attributes directly; this settings container needs no methods.
+class Config:  # pylint: disable=too-few-public-methods
+    """Provide environment-based settings consumed by the Flask application factory."""
     APP_ENV = os.environ.get("APP_ENV", "development").lower()
     SECRET_KEY = os.environ.get("SECRET_KEY")
     DATABASE = os.environ.get(

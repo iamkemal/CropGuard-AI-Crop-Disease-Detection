@@ -1,3 +1,5 @@
+"""Validate, re-encode, and privately store supported crop image uploads."""
+
 from __future__ import annotations
 
 import warnings
@@ -26,12 +28,24 @@ def save_crop_image(
     uploaded_file: FileStorage,
     upload_folder: str | Path,
 ) -> str:
+    """Validate an upload, store a clean image, and return its generated filename."""
     original_name = uploaded_file.filename or ""
     extension = Path(original_name).suffix.lower()
     expected_format = ALLOWED_EXTENSIONS.get(extension)
     if expected_format is None:
         raise UploadValidationError("Choose a JPG, JPEG, PNG, or WEBP image.")
 
+    image_bytes = _reencode_image(uploaded_file, expected_format)
+
+    target_directory = Path(upload_folder)
+    target_directory.mkdir(parents=True, exist_ok=True)
+    safe_filename = f"{uuid4().hex}{extension}"
+    (target_directory / safe_filename).write_bytes(image_bytes)
+    return safe_filename
+
+
+def _reencode_image(uploaded_file: FileStorage, expected_format: str) -> bytes:
+    """Validate decoded pixels and return a clean encoding without source metadata."""
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
@@ -78,9 +92,4 @@ def save_crop_image(
         raise UploadValidationError(
             "The uploaded file is not a valid, readable image."
         ) from error
-
-    target_directory = Path(upload_folder)
-    target_directory.mkdir(parents=True, exist_ok=True)
-    safe_filename = f"{uuid4().hex}{extension}"
-    (target_directory / safe_filename).write_bytes(output.getvalue())
-    return safe_filename
+    return output.getvalue()

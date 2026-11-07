@@ -35,16 +35,28 @@ DISEASES = (
         "maize",
         "Northern Leaf Blight",
         "Exserohilum turcicum",
-        "A fungal leaf disease that can cause long, cigar-shaped lesions and reduce healthy leaf area.",
-        "The fungus Exserohilum turcicum infects maize leaves; infected crop residue can carry it between seasons.",
+        (
+            "A fungal leaf disease that can cause long, cigar-shaped lesions and "
+            "reduce healthy leaf area."
+        ),
+        (
+            "The fungus Exserohilum turcicum infects maize leaves; infected crop "
+            "residue can carry it between seasons."
+        ),
     ),
     (
         "gray_leaf_spot",
         "maize",
         "Gray Leaf Spot",
         "Cercospora zeae-maydis",
-        "A fungal leaf disease characterized by narrow, rectangular lesions, often limited by leaf veins.",
-        "The fungus Cercospora zeae-maydis survives in infected maize residue and spreads by wind and splashing water.",
+        (
+            "A fungal leaf disease characterized by narrow, rectangular lesions, "
+            "often limited by leaf veins."
+        ),
+        (
+            "The fungus Cercospora zeae-maydis survives in infected maize residue"
+            " and spreads by wind and splashing water."
+        ),
     ),
     (
         "common_rust",
@@ -52,47 +64,80 @@ DISEASES = (
         "Common Rust",
         "Puccinia sorghi",
         "A fungal disease that produces raised rust-colored pustules on maize leaves.",
-        "The fungus Puccinia sorghi spreads by airborne spores; humid conditions can favor disease development.",
+        (
+            "The fungus Puccinia sorghi spreads by airborne spores; humid "
+            "conditions can favor disease development."
+        ),
     ),
     (
         "maize_streak_virus",
         "maize",
         "Maize Streak Virus",
         "Maize streak virus",
-        "A viral disease that commonly produces pale yellow streaks running along the leaf veins and may stunt plants.",
-        "Maize streak virus is transmitted by leafhoppers. Infected plants and susceptible grass hosts can contribute to spread.",
+        (
+            "A viral disease that commonly produces pale yellow streaks running "
+            "along the leaf veins and may stunt plants."
+        ),
+        (
+            "Maize streak virus is transmitted by leafhoppers. Infected plants "
+            "and susceptible grass hosts can contribute to spread."
+        ),
     ),
     (
         "early_blight",
         "tomato",
         "Early Blight",
         "Alternaria linariae",
-        "A fungal disease that often starts on older, lower leaves with dark spots and concentric rings.",
-        "Alternaria fungi survive on crop debris and can spread by wind and water splash; warm, wet weather favors disease.",
+        (
+            "A fungal disease that often starts on older, lower leaves with dark "
+            "spots and concentric rings."
+        ),
+        (
+            "Alternaria fungi survive on crop debris and can spread by wind and "
+            "water splash; warm, wet weather favors disease."
+        ),
     ),
     (
         "late_blight",
         "tomato",
         "Late Blight",
         "Phytophthora infestans",
-        "A rapidly developing disease that can affect tomato leaves, stems, and fruit, especially during cool, wet weather.",
-        "The oomycete Phytophthora infestans spreads through spores carried by wind, rain, irrigation, or contaminated material.",
+        (
+            "A rapidly developing disease that can affect tomato leaves, stems, "
+            "and fruit, especially during cool, wet weather."
+        ),
+        (
+            "The oomycete Phytophthora infestans spreads through spores carried "
+            "by wind, rain, irrigation, or contaminated material."
+        ),
     ),
     (
         "bacterial_wilt",
         "tomato",
         "Bacterial Wilt",
         "Ralstonia solanacearum species complex",
-        "A soil-associated bacterial disease that can cause sudden wilting while foliage initially remains green.",
-        "Ralstonia bacteria persist in soil and can move in contaminated water, soil, tools, or infected planting material.",
+        (
+            "A soil-associated bacterial disease that can cause sudden wilting "
+            "while foliage initially remains green."
+        ),
+        (
+            "Ralstonia bacteria persist in soil and can move in contaminated "
+            "water, soil, tools, or infected planting material."
+        ),
     ),
     (
         "tomato_yellow_leaf_curl_virus",
         "tomato",
         "Tomato Yellow Leaf Curl Virus",
         "Tomato yellow leaf curl virus",
-        "A viral disease that can cause yellowing and curling of young leaves, stunted growth, and flower drop.",
-        "The virus is transmitted by adult whiteflies; infected plants and susceptible host plants can serve as sources.",
+        (
+            "A viral disease that can cause yellowing and curling of young "
+            "leaves, stunted growth, and flower drop."
+        ),
+        (
+            "The virus is transmitted by adult whiteflies; infected plants and "
+            "susceptible host plants can serve as sources."
+        ),
     ),
 )
 
@@ -240,7 +285,10 @@ SYMPTOMS = (
         "tomato",
         "general_yellowing_older_leaves",
         "Older leaves yellow uniformly",
-        "Older leaves show general yellowing without the distinctive signs listed for a disease rule.",
+        (
+            "Older leaves show general yellowing without the distinctive signs "
+            "listed for a disease rule."
+        ),
     ),
 )
 
@@ -294,7 +342,10 @@ RULES = (
         "maize_northern_leaf_blight",
         "northern_leaf_blight",
         "Northern leaf blight pattern",
-        "IF long cigar-shaped maize lesions are present AND at least one supporting symptom is selected, THEN consider Northern Leaf Blight.",
+        (
+            "IF long cigar-shaped maize lesions are present AND at least one "
+            "supporting symptom is selected, THEN consider Northern Leaf Blight."
+        ),
         2,
         0.25,
         30,
@@ -308,7 +359,11 @@ RULES = (
         "maize_gray_leaf_spot",
         "gray_leaf_spot",
         "Gray leaf spot pattern",
-        "IF rectangular lesions bounded by maize leaf veins are present AND at least one supporting symptom is selected, THEN consider Gray Leaf Spot.",
+        (
+            "IF rectangular lesions bounded by maize leaf veins are present AND "
+            "at least one supporting symptom is selected, THEN consider Gray Leaf"
+            " Spot."
+        ),
         2,
         0.25,
         30,
@@ -322,7 +377,10 @@ RULES = (
         "maize_common_rust",
         "common_rust",
         "Common rust pattern",
-        "IF raised brick-red maize leaf pustules are present AND at least one supporting symptom is selected, THEN consider Common Rust.",
+        (
+            "IF raised brick-red maize leaf pustules are present AND at least one"
+            " supporting symptom is selected, THEN consider Common Rust."
+        ),
         2,
         0.25,
         30,
@@ -336,7 +394,10 @@ RULES = (
         "maize_streak_virus_pattern",
         "maize_streak_virus",
         "Maize streak pattern",
-        "IF pale yellow streaks run along maize leaf veins AND at least one supporting symptom is selected, THEN consider Maize Streak Virus.",
+        (
+            "IF pale yellow streaks run along maize leaf veins AND at least one "
+            "supporting symptom is selected, THEN consider Maize Streak Virus."
+        ),
         2,
         0.25,
         30,
@@ -350,7 +411,10 @@ RULES = (
         "tomato_early_blight",
         "early_blight",
         "Early blight pattern",
-        "IF tomato leaf spots have concentric rings AND at least one supporting symptom is selected, THEN consider Early Blight.",
+        (
+            "IF tomato leaf spots have concentric rings AND at least one "
+            "supporting symptom is selected, THEN consider Early Blight."
+        ),
         2,
         0.25,
         30,
@@ -364,7 +428,10 @@ RULES = (
         "tomato_late_blight_water_soaked",
         "late_blight",
         "Late blight water-soaked lesion pattern",
-        "IF irregular water-soaked lesions are present AND at least one supporting symptom is selected, THEN consider Late Blight.",
+        (
+            "IF irregular water-soaked lesions are present AND at least one "
+            "supporting symptom is selected, THEN consider Late Blight."
+        ),
         2,
         0.25,
         30,
@@ -378,7 +445,10 @@ RULES = (
         "tomato_late_blight_white_growth",
         "late_blight",
         "Late blight white growth pattern",
-        "IF white cottony growth is visible under tomato leaves AND at least one supporting symptom is selected, THEN consider Late Blight.",
+        (
+            "IF white cottony growth is visible under tomato leaves AND at least "
+            "one supporting symptom is selected, THEN consider Late Blight."
+        ),
         2,
         0.25,
         31,
@@ -392,7 +462,11 @@ RULES = (
         "tomato_bacterial_wilt",
         "bacterial_wilt",
         "Bacterial wilt pattern",
-        "IF sudden tomato wilting or brown stem vascular tissue is present AND at least one supporting symptom is selected, THEN consider Bacterial Wilt.",
+        (
+            "IF sudden tomato wilting or brown stem vascular tissue is present "
+            "AND at least one supporting symptom is selected, THEN consider "
+            "Bacterial Wilt."
+        ),
         2,
         0.25,
         30,
@@ -406,7 +480,10 @@ RULES = (
         "tomato_yellow_leaf_curl_yellowing",
         "tomato_yellow_leaf_curl_virus",
         "Yellow leaf curl yellowing pattern",
-        "IF young tomato leaves turn yellow AND at least one supporting symptom is selected, THEN consider Tomato Yellow Leaf Curl Virus.",
+        (
+            "IF young tomato leaves turn yellow AND at least one supporting "
+            "symptom is selected, THEN consider Tomato Yellow Leaf Curl Virus."
+        ),
         2,
         0.25,
         30,
@@ -421,7 +498,10 @@ RULES = (
         "tomato_yellow_leaf_curl_curling",
         "tomato_yellow_leaf_curl_virus",
         "Yellow leaf curl curling pattern",
-        "IF young tomato leaves curl upward AND at least one supporting symptom is selected, THEN consider Tomato Yellow Leaf Curl Virus.",
+        (
+            "IF young tomato leaves curl upward AND at least one supporting "
+            "symptom is selected, THEN consider Tomato Yellow Leaf Curl Virus."
+        ),
         2,
         0.25,
         31,
@@ -439,82 +519,144 @@ TREATMENTS = (
     (
         "northern_leaf_blight",
         "treatment",
-        "Remove heavily infected plant material where practical. For fungicide decisions, consult a local crop adviser and use only products registered for maize in the area, following the label.",
+        (
+            "Remove heavily infected plant material where practical. For "
+            "fungicide decisions, consult a local crop adviser and use only "
+            "products registered for maize in the area, following the label."
+        ),
     ),
     (
         "northern_leaf_blight",
         "prevention",
-        "Choose locally suitable resistant or tolerant varieties, rotate away from maize when practical, and manage infected crop residue.",
+        (
+            "Choose locally suitable resistant or tolerant varieties, rotate away"
+            " from maize when practical, and manage infected crop residue."
+        ),
     ),
     (
         "gray_leaf_spot",
         "treatment",
-        "Scout fields and seek local crop-adviser guidance before using a fungicide; use only locally registered products and follow their labels.",
+        (
+            "Scout fields and seek local crop-adviser guidance before using a "
+            "fungicide; use only locally registered products and follow their "
+            "labels."
+        ),
     ),
     (
         "gray_leaf_spot",
         "prevention",
-        "Use resistant varieties where available, rotate crops, and reduce infected maize residue through locally appropriate tillage or residue management.",
+        (
+            "Use resistant varieties where available, rotate crops, and reduce "
+            "infected maize residue through locally appropriate tillage or "
+            "residue management."
+        ),
     ),
     (
         "common_rust",
         "treatment",
-        "Assess disease severity and crop stage with a local adviser. If treatment is warranted, use only a locally registered product according to its label.",
+        (
+            "Assess disease severity and crop stage with a local adviser. If "
+            "treatment is warranted, use only a locally registered product "
+            "according to its label."
+        ),
     ),
     (
         "common_rust",
         "prevention",
-        "Select resistant or tolerant varieties suited to the area and monitor crops early for rust pustules.",
+        (
+            "Select resistant or tolerant varieties suited to the area and "
+            "monitor crops early for rust pustules."
+        ),
     ),
     (
         "maize_streak_virus",
         "treatment",
-        "There is no curative treatment for plants already infected by the virus. Remove severely affected plants when practical and seek local advice about leafhopper management.",
+        (
+            "There is no curative treatment for plants already infected by the "
+            "virus. Remove severely affected plants when practical and seek local"
+            " advice about leafhopper management."
+        ),
     ),
     (
         "maize_streak_virus",
         "prevention",
-        "Use locally recommended resistant varieties, plant at locally advised times, remove volunteer maize and grass hosts near fields, and use only locally approved vector-control measures.",
+        (
+            "Use locally recommended resistant varieties, plant at locally "
+            "advised times, remove volunteer maize and grass hosts near fields, "
+            "and use only locally approved vector-control measures."
+        ),
     ),
     (
         "early_blight",
         "treatment",
-        "Remove badly affected leaves when practical and avoid working among wet plants. If fungicides are considered, consult a local adviser and follow a locally registered product label.",
+        (
+            "Remove badly affected leaves when practical and avoid working among "
+            "wet plants. If fungicides are considered, consult a local adviser "
+            "and follow a locally registered product label."
+        ),
     ),
     (
         "early_blight",
         "prevention",
-        "Rotate away from tomato for 2–3 years where feasible, remove infected crop debris and volunteer tomatoes, maintain plant vigor, and avoid prolonged leaf wetness.",
+        (
+            "Rotate away from tomato for 2–3 years where feasible, remove "
+            "infected crop debris and volunteer tomatoes, maintain plant vigor, "
+            "and avoid prolonged leaf wetness."
+        ),
     ),
     (
         "late_blight",
         "treatment",
-        "Act promptly: isolate and safely remove heavily infected plants and fruit. Contact a local crop adviser; use fungicides only when locally registered and exactly as labeled.",
+        (
+            "Act promptly: isolate and safely remove heavily infected plants and "
+            "fruit. Contact a local crop adviser; use fungicides only when "
+            "locally registered and exactly as labeled."
+        ),
     ),
     (
         "late_blight",
         "prevention",
-        "Inspect plants frequently, avoid prolonged leaf wetness, improve airflow, and remove volunteer tomato and potato plants that may carry the pathogen.",
+        (
+            "Inspect plants frequently, avoid prolonged leaf wetness, improve "
+            "airflow, and remove volunteer tomato and potato plants that may "
+            "carry the pathogen."
+        ),
     ),
     (
         "bacterial_wilt",
         "treatment",
-        "There is no reliable curative field treatment once plants are systemically infected. Remove affected plants and avoid moving contaminated soil or water to healthy areas.",
+        (
+            "There is no reliable curative field treatment once plants are "
+            "systemically infected. Remove affected plants and avoid moving "
+            "contaminated soil or water to healthy areas."
+        ),
     ),
     (
         "bacterial_wilt",
         "prevention",
-        "Use clean planting material, clean tools, improve drainage, avoid contaminated irrigation water, and rotate with locally suitable non-host crops.",
+        (
+            "Use clean planting material, clean tools, improve drainage, avoid "
+            "contaminated irrigation water, and rotate with locally suitable "
+            "non-host crops."
+        ),
     ),
     (
         "tomato_yellow_leaf_curl_virus",
         "treatment",
-        "There is no curative treatment for infected plants. Remove severely affected plants where practical and manage whiteflies using locally approved integrated pest-management guidance.",
+        (
+            "There is no curative treatment for infected plants. Remove severely "
+            "affected plants where practical and manage whiteflies using locally "
+            "approved integrated pest-management guidance."
+        ),
     ),
     (
         "tomato_yellow_leaf_curl_virus",
         "prevention",
-        "Use resistant varieties where available, inspect transplants before planting, remove infected volunteer hosts, and monitor whiteflies using locally recommended methods.",
+        (
+            "Use resistant varieties where available, inspect transplants before "
+            "planting, remove infected volunteer hosts, and monitor whiteflies "
+            "using locally recommended methods."
+        ),
     ),
 )
 
@@ -765,6 +907,7 @@ def initialize_database(database_path: Path | str = DEFAULT_DATABASE_PATH) -> No
 
 
 def main() -> None:
+    """Initialize and seed the database selected by the command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Create the SQLite database and seed the crop knowledge base."
     )

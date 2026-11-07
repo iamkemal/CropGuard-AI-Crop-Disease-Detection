@@ -1,38 +1,26 @@
+"""Exercise diagnosis submission, history, and private upload access."""
+
 import sqlite3
-import tempfile
 import unittest
 from contextlib import closing
 from io import BytesIO
-from pathlib import Path
 from urllib.parse import urlparse
 
 from PIL import Image
 from werkzeug.security import generate_password_hash
 
-from app import create_app
+from tests.support import FlaskTestCase
 
 
-class FarmerWorkflowTests(unittest.TestCase):
+class FarmerWorkflowTests(FlaskTestCase):
+    """Verify farmer diagnosis submission and ownership of stored images."""
     def setUp(self) -> None:
-        temporary_directory = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary_directory.cleanup)
-        self.temporary_path = Path(temporary_directory.name)
-        self.database_path = self.temporary_path / "test.sqlite3"
-        self.upload_path = self.temporary_path / "uploads"
-        self.app = create_app(
-            {
-                "TESTING": True,
-                "SECRET_KEY": "test-key-not-for-production",
-                "DATABASE": str(self.database_path),
-                "UPLOAD_FOLDER": str(self.upload_path),
-                "WTF_CSRF_ENABLED": False,
-            }
-        )
-        self.client = self.app.test_client()
+        super().setUp()
         self.create_user("farmer@example.test")
         self.login("farmer@example.test")
 
     def create_user(self, email: str) -> None:
+        """Insert a test user with a hashed password into the isolated database."""
         with closing(sqlite3.connect(self.database_path)) as connection:
             with connection:
                 connection.execute(
@@ -48,6 +36,7 @@ class FarmerWorkflowTests(unittest.TestCase):
                 )
 
     def login(self, email: str) -> None:
+        """Log the test browser in using the specified farmer account."""
         response = self.client.post(
             "/login",
             data={
@@ -58,6 +47,7 @@ class FarmerWorkflowTests(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
 
     def create_image(self, image_format: str = "PNG") -> BytesIO:
+        """Create an in-memory image for the multipart diagnosis requests."""
         image_data = BytesIO()
         Image.new("RGB", (32, 24), color=(35, 107, 69)).save(
             image_data,
@@ -67,6 +57,7 @@ class FarmerWorkflowTests(unittest.TestCase):
         return image_data
 
     def test_crop_selection_and_diagnosis_form_show_crop_logo(self) -> None:
+        """Verify crop and diagnosis pages include crop illustrations and upload guidance."""
         crop_response = self.client.get("/farmer/crops")
         diagnosis_response = self.client.get("/farmer/crops/maize")
         disease_response = self.client.get("/farmer/diseases/early_blight")
@@ -81,6 +72,7 @@ class FarmerWorkflowTests(unittest.TestCase):
         self.assertIn(b"Agricultural references", disease_response.data)
 
     def test_diagnosis_saves_symptoms_candidate_and_private_image(self) -> None:
+        """Verify a submitted diagnosis stores its evidence and private photo."""
         response = self.client.post(
             "/farmer/crops/tomato",
             data={
@@ -141,6 +133,7 @@ class FarmerWorkflowTests(unittest.TestCase):
         image_response.close()
 
     def test_uploaded_image_is_not_used_to_classify_unmatched_symptoms(self) -> None:
+        """Verify uploaded photos do not influence symptom-only disease inference."""
         response = self.client.post(
             "/farmer/crops/tomato",
             data={
@@ -168,6 +161,7 @@ class FarmerWorkflowTests(unittest.TestCase):
         self.assertEqual(candidate_count, 0)
 
     def test_invalid_upload_does_not_create_diagnosis(self) -> None:
+        """Verify an invalid upload cannot create a diagnosis record."""
         response = self.client.post(
             "/farmer/crops/tomato",
             data={
@@ -186,6 +180,7 @@ class FarmerWorkflowTests(unittest.TestCase):
         self.assertEqual(list(self.upload_path.iterdir()), [])
 
     def test_request_rejects_images_larger_than_configured_limit(self) -> None:
+        """Verify requests exceeding the configured upload size are rejected."""
         response = self.client.post(
             "/farmer/crops/tomato",
             data={
@@ -210,6 +205,7 @@ class FarmerWorkflowTests(unittest.TestCase):
         response.close()
 
     def test_farmer_cannot_view_another_users_diagnosis_image(self) -> None:
+        """Verify a farmer cannot retrieve another farmer's stored image."""
         response = self.client.post(
             "/farmer/crops/tomato",
             data={

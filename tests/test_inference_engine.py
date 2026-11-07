@@ -1,3 +1,5 @@
+"""Verify symptom-only inference and explanations for stored crop rules."""
+
 import sqlite3
 import tempfile
 import unittest
@@ -9,15 +11,20 @@ from app.services.inference_engine import infer_disease
 
 
 class InferenceEngineTests(unittest.TestCase):
+    """Verify rule evidence, ranked diagnoses, and invalid symptom handling."""
     def setUp(self) -> None:
-        temporary_directory = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary_directory.cleanup)
-        self.database_path = Path(temporary_directory.name) / "test.sqlite3"
+        # unittest closes this context after the test, rather than at the end of setUp.
+        temporary_directory = self.enterContext(
+            tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
+        )
+        self.database_path = Path(temporary_directory) / "test.sqlite3"
         initialize_database(self.database_path)
-        self.connection = sqlite3.connect(self.database_path)
-        self.addCleanup(self.connection.close)
+        self.connection = self.enterContext(
+            closing(sqlite3.connect(self.database_path))
+        )
 
     def test_matches_disease_and_explains_rule_evidence(self) -> None:
+        """Verify matching symptoms produce the expected disease and rule explanation."""
         result = infer_disease(
             self.connection,
             "maize",
@@ -42,6 +49,7 @@ class InferenceEngineTests(unittest.TestCase):
         self.assertIn("possible diagnosis", result.explanation)
 
     def test_returns_multiple_similarly_scored_disease_candidates(self) -> None:
+        """Verify similarly scored qualified diseases remain visible as alternatives."""
         result = infer_disease(
             self.connection,
             "tomato",
@@ -63,6 +71,7 @@ class InferenceEngineTests(unittest.TestCase):
         self.assertIn("similarly strong", result.explanation)
 
     def test_reports_insufficient_evidence_for_partial_rule(self) -> None:
+        """Verify partial rule matches explain the additional evidence required."""
         result = infer_disease(
             self.connection,
             "maize",
@@ -79,6 +88,7 @@ class InferenceEngineTests(unittest.TestCase):
         self.assertIn("at least 2 matched symptoms", result.explanation)
 
     def test_reports_no_match_when_symptoms_have_no_rule_conditions(self) -> None:
+        """Verify symptoms outside stored rule conditions produce no match."""
         result = infer_disease(
             self.connection,
             "tomato",
@@ -90,12 +100,14 @@ class InferenceEngineTests(unittest.TestCase):
         self.assertEqual(result.rule_evidence, ())
 
     def test_empty_symptom_selection_is_insufficient_evidence(self) -> None:
+        """Verify empty symptom selections report insufficient evidence."""
         result = infer_disease(self.connection, "tomato", ())
 
         self.assertEqual(result.outcome, "insufficient_evidence")
         self.assertEqual(result.confidence_level, "none")
 
     def test_rejects_symptoms_from_another_crop(self) -> None:
+        """Verify symptoms from another crop are rejected before inference."""
         with self.assertRaisesRegex(ValueError, "do not belong to tomato"):
             infer_disease(
                 self.connection,
@@ -104,6 +116,7 @@ class InferenceEngineTests(unittest.TestCase):
             )
 
     def test_rejects_unknown_crop(self) -> None:
+        """Verify inference rejects an unknown crop."""
         with self.assertRaises(LookupError):
             infer_disease(self.connection, "potato", ())
 

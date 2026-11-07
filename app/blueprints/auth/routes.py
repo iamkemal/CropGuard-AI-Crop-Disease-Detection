@@ -1,3 +1,5 @@
+"""Account registration, authentication, and role-based access controls."""
+
 import re
 import sqlite3
 from functools import wraps
@@ -15,7 +17,7 @@ from flask import (
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.blueprints.auth import auth_bp
+from app.blueprints.auth.blueprint import auth_bp
 from app.database import get_db
 
 
@@ -25,6 +27,7 @@ EMAIL_PATTERN = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
 
 @auth_bp.before_app_request
 def load_logged_in_user() -> None:
+    """Load the active session user or clear an invalid account session."""
     user_id = session.get("user_id")
     if not isinstance(user_id, int):
         g.user = None
@@ -46,6 +49,7 @@ def load_logged_in_user() -> None:
 
 
 def login_required(view: ViewFunction) -> ViewFunction:
+    """Wrap a view so anonymous visitors must log in before accessing it."""
     @wraps(view)
     def wrapped_view(*args, **kwargs):
         if g.get("user") is None:
@@ -57,6 +61,7 @@ def login_required(view: ViewFunction) -> ViewFunction:
 
 
 def roles_required(*roles: str):
+    """Wrap a view with authentication and an allowed-role check."""
     def decorator(view: ViewFunction) -> ViewFunction:
         @wraps(view)
         def wrapped_view(*args, **kwargs):
@@ -75,6 +80,7 @@ def roles_required(*roles: str):
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
+    """Validate registration data and create a farmer account with a hashed password."""
     if request.method == "GET":
         return render_template("auth/register.html")
 
@@ -126,6 +132,7 @@ def register():
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
+    """Authenticate an active user and establish a fresh role-based session."""
     if request.method == "GET":
         return render_template("auth/login.html")
 
@@ -160,6 +167,7 @@ def login():
 @auth_bp.post("/logout")
 @login_required
 def logout():
+    """Clear the current session and return the visitor to the login page."""
     session.clear()
     flash("You have been logged out.", "success")
     return redirect(url_for("home"))

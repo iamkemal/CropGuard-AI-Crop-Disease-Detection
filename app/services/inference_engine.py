@@ -13,12 +13,15 @@ ConfidenceLevel = Literal["none", "low", "moderate", "high"]
 
 @dataclass(frozen=True)
 class SymptomEvidence:
+    """Identify one selected or required symptom and its display label."""
     slug: str
     label: str
 
 
+# Flat records keep rule evidence explicit rather than hiding related fields.
 @dataclass(frozen=True)
-class RuleEvidence:
+class RuleEvidence:  # pylint: disable=too-many-instance-attributes
+    """Describe a rule, its matched evidence, and its qualification thresholds."""
     disease_id: int
     disease_slug: str
     disease_name: str
@@ -35,6 +38,7 @@ class RuleEvidence:
 
 @dataclass(frozen=True)
 class DiseaseCandidate:
+    """Collect the qualified rule evidence supporting a ranked disease candidate."""
     disease_id: int
     slug: str
     name: str
@@ -44,8 +48,10 @@ class DiseaseCandidate:
     matched_rules: tuple[RuleEvidence, ...]
 
 
+# Flat records keep rule evidence explicit rather than hiding related fields.
 @dataclass(frozen=True)
-class InferenceResult:
+class InferenceResult:  # pylint: disable=too-many-instance-attributes
+    """Return the diagnosis outcome, ranked candidates, and supporting explanation."""
     outcome: Outcome
     crop_slug: str
     crop_name: str
@@ -63,8 +69,9 @@ class _Condition:
     weight: float
 
 
+# Flat records keep rule evidence explicit rather than hiding related fields.
 @dataclass
-class _RuleBuilder:
+class _RuleBuilder:  # pylint: disable=too-many-instance-attributes
     rule_id: int
     code: str
     name: str
@@ -78,8 +85,9 @@ class _RuleBuilder:
     conditions: list[_Condition]
 
 
+# Flat records keep rule evidence explicit rather than hiding related fields.
 @dataclass(frozen=True)
-class _Rule:
+class _Rule:  # pylint: disable=too-many-instance-attributes
     code: str
     name: str
     description: str
@@ -244,27 +252,13 @@ def _build_candidates(
     )
 
 
-def infer_disease(
+def _load_selected_symptoms(
     connection: sqlite3.Connection,
+    crop_id: int,
     crop_slug: str,
-    observed_symptom_slugs: Iterable[str],
-) -> InferenceResult:
-    """Evaluate active rules for one crop; uploaded images are not accepted or read."""
-    if not isinstance(crop_slug, str) or not crop_slug.strip():
-        raise ValueError("A crop slug is required.")
-
-    supplied_symptoms = tuple(observed_symptom_slugs)
-    if any(not isinstance(slug, str) or not slug.strip() for slug in supplied_symptoms):
-        raise ValueError("Every selected symptom must have a non-empty slug.")
-    selected_slugs = tuple(dict.fromkeys(supplied_symptoms))
-
-    crop = connection.execute(
-        "SELECT id, slug, name FROM crops WHERE slug = ? AND is_active = 1",
-        (crop_slug,),
-    ).fetchone()
-    if crop is None:
-        raise LookupError(f"Unknown or inactive crop: {crop_slug}")
-
+    selected_slugs: tuple[str, ...],
+) -> tuple[SymptomEvidence, ...]:
+    """Validate selected slugs against the active symptoms of the chosen crop."""
     symptom_rows = connection.execute(
         """
         SELECT slug, label
@@ -272,7 +266,7 @@ def infer_disease(
         WHERE crop_id = ? AND is_active = 1
         ORDER BY label COLLATE NOCASE
         """,
-        (int(crop[0]),),
+        (crop_id,),
     ).fetchall()
     symptoms_by_slug = {
         str(row[0]): SymptomEvidence(str(row[0]), str(row[1]))
@@ -285,67 +279,41 @@ def infer_disease(
             + ", ".join(unknown_slugs)
         )
 
-    selected_symptoms = tuple(
+    return tuple(
         symptoms_by_slug[slug] for slug in selected_slugs
     )
-    rules = _load_rules(connection, int(crop[0]))
-    evaluated = tuple(
-        _evaluate_rule(rule, set(selected_slugs)) for rule in rules
-    )
-    rule_priority = {rule.code: rule.priority for rule in rules}
-    activated_evidence = tuple(
-        sorted(
-            (evidence for evidence in evaluated if evidence.matched_symptoms),
-            key=lambda evidence: (
-                -evidence.match_score,
-                len(evidence.missing_required_symptoms),
-                max(
-                    0,
-                    evidence.minimum_matches - len(evidence.matched_symptoms),
-                ),
-                rule_priority[evidence.code],
-                evidence.code,
-            ),
-        )
-    )
-    qualified_evidence = tuple(
-        evidence for evidence in activated_evidence if evidence.qualified
-    )
-    candidates = _build_candidates(qualified_evidence, rule_priority)
-    crop_name = str(crop[2])
 
-    if candidates:
-        top_score = candidates[0].match_score
-        if len(candidates) > 1 and top_score - candidates[1].match_score <= 0.1:
-            names = ", ".join(candidate.name for candidate in candidates)
-            explanation = (
-                "Several diseases have similarly strong matching rule evidence: "
-                f"{names}. These are possible causes, not confirmed diagnoses; "
-                "seek local agricultural advice if the problem persists."
-            )
-        elif len(candidates) > 1:
-            explanation = (
-                f"{candidates[0].name} has the strongest matching rule evidence, "
-                "but other diseases also matched. Treat the results as possibilities, "
-                "not as a confirmed diagnosis."
-            )
-        else:
-            explanation = (
-                f"The stored rule evidence most strongly supports {candidates[0].name} "
-                f"(weighted rule-match score {top_score:.0%}). This is a possible "
-                "diagnosis, not confirmation."
-            )
-        return InferenceResult(
-            outcome="matched",
-            crop_slug=str(crop[1]),
-            crop_name=crop_name,
-            selected_symptoms=selected_symptoms,
-            candidates=candidates,
-            rule_evidence=activated_evidence,
-            confidence_level=candidates[0].confidence_level,
-            explanation=explanation,
-        )
 
+def _matched_explanation(candidates: tuple[DiseaseCandidate, ...]) -> str:
+    """Explain leading candidates without treating rule scores as probabilities."""
+    top_score = candidates[0].match_score
+    if len(candidates) > 1 and top_score - candidates[1].match_score <= 0.1:
+        names = ", ".join(candidate.name for candidate in candidates)
+        explanation = (
+            "Several diseases have similarly strong matching rule evidence: "
+            f"{names}. These are possible causes, not confirmed diagnoses; "
+            "seek local agricultural advice if the problem persists."
+        )
+    elif len(candidates) > 1:
+        explanation = (
+            f"{candidates[0].name} has the strongest matching rule evidence, "
+            "but other diseases also matched. Treat the results as possibilities, "
+            "not as a confirmed diagnosis."
+        )
+    else:
+        explanation = (
+            f"The stored rule evidence most strongly supports {candidates[0].name} "
+            f"(weighted rule-match score {top_score:.0%}). This is a possible "
+            "diagnosis, not confirmation."
+        )
+    return explanation
+
+
+def _unmatched_explanation(
+    selected_slugs: tuple[str, ...],
+    activated_evidence: tuple[RuleEvidence, ...],
+) -> str:
+    """Explain missing evidence or the absence of any matching stored rule."""
     if not selected_slugs:
         explanation = (
             "No symptoms were selected, so there is not enough evidence to evaluate "
@@ -376,6 +344,70 @@ def infer_disease(
             "No stored IF-THEN rule matched the selected symptoms. The symptoms may "
             "have another cause or need assessment by a local agricultural adviser."
         )
+    return explanation
+
+
+def infer_disease(
+    connection: sqlite3.Connection,
+    crop_slug: str,
+    observed_symptom_slugs: Iterable[str],
+) -> InferenceResult:
+    """Evaluate active rules for one crop; uploaded images are not accepted or read."""
+    if not isinstance(crop_slug, str) or not crop_slug.strip():
+        raise ValueError("A crop slug is required.")
+
+    supplied_symptoms = tuple(observed_symptom_slugs)
+    if any(not isinstance(slug, str) or not slug.strip() for slug in supplied_symptoms):
+        raise ValueError("Every selected symptom must have a non-empty slug.")
+    selected_slugs = tuple(dict.fromkeys(supplied_symptoms))
+
+    crop = connection.execute(
+        "SELECT id, slug, name FROM crops WHERE slug = ? AND is_active = 1",
+        (crop_slug,),
+    ).fetchone()
+    if crop is None:
+        raise LookupError(f"Unknown or inactive crop: {crop_slug}")
+
+    selected_symptoms = _load_selected_symptoms(
+        connection, int(crop[0]), crop_slug, selected_slugs
+    )
+    rules = _load_rules(connection, int(crop[0]))
+    evaluated = tuple(
+        _evaluate_rule(rule, set(selected_slugs)) for rule in rules
+    )
+    rule_priority = {rule.code: rule.priority for rule in rules}
+    activated_evidence = tuple(
+        sorted(
+            (evidence for evidence in evaluated if evidence.matched_symptoms),
+            key=lambda evidence: (
+                -evidence.match_score,
+                len(evidence.missing_required_symptoms),
+                max(
+                    0,
+                    evidence.minimum_matches - len(evidence.matched_symptoms),
+                ),
+                rule_priority[evidence.code],
+                evidence.code,
+            ),
+        )
+    )
+    qualified_evidence = tuple(
+        evidence for evidence in activated_evidence if evidence.qualified
+    )
+    candidates = _build_candidates(qualified_evidence, rule_priority)
+    crop_name = str(crop[2])
+
+    if candidates:
+        return InferenceResult(
+            outcome="matched",
+            crop_slug=str(crop[1]),
+            crop_name=crop_name,
+            selected_symptoms=selected_symptoms,
+            candidates=candidates,
+            rule_evidence=activated_evidence,
+            confidence_level=candidates[0].confidence_level,
+            explanation=_matched_explanation(candidates),
+        )
 
     return InferenceResult(
         outcome="insufficient_evidence" if activated_evidence or not selected_slugs else "no_match",
@@ -385,5 +417,5 @@ def infer_disease(
         candidates=(),
         rule_evidence=activated_evidence,
         confidence_level="none",
-        explanation=explanation,
+        explanation=_unmatched_explanation(selected_slugs, activated_evidence),
     )

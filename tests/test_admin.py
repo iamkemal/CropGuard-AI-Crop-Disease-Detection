@@ -1,36 +1,24 @@
+"""Exercise administrator permissions and knowledge-base management."""
+
 import sqlite3
-import tempfile
 import unittest
 from contextlib import closing
-from pathlib import Path
 
 from werkzeug.security import generate_password_hash
 
-from app import create_app
+from tests.support import FlaskTestCase
 
 
-class AdminConsoleTests(unittest.TestCase):
+class AdminConsoleTests(FlaskTestCase):
+    """Verify administrator access and complete knowledge-base CRUD workflows."""
     def setUp(self) -> None:
-        temporary_directory = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary_directory.cleanup)
-        self.temporary_path = Path(temporary_directory.name)
-        self.database_path = self.temporary_path / "test.sqlite3"
-        self.upload_path = self.temporary_path / "uploads"
-        self.app = create_app(
-            {
-                "TESTING": True,
-                "SECRET_KEY": "test-key-not-for-production",
-                "DATABASE": str(self.database_path),
-                "UPLOAD_FOLDER": str(self.upload_path),
-                "WTF_CSRF_ENABLED": False,
-            }
-        )
-        self.client = self.app.test_client()
+        super().setUp()
         self.admin_id = self.create_user("admin@example.test", "admin")
         self.farmer_id = self.create_user("farmer@example.test", "farmer")
         self.login_admin()
 
     def create_user(self, email: str, role: str) -> int:
+        """Insert a test user with a hashed password into the isolated database."""
         with closing(sqlite3.connect(self.database_path)) as connection:
             with connection:
                 cursor = connection.execute(
@@ -48,6 +36,7 @@ class AdminConsoleTests(unittest.TestCase):
                 return int(cursor.lastrowid)
 
     def login_admin(self) -> None:
+        """Log the test browser in as the seeded administrator."""
         response = self.client.post(
             "/login",
             data={
@@ -58,28 +47,34 @@ class AdminConsoleTests(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
 
     def database_row(self, query: str, values: tuple = ()):
+        """Read one row from the test database with named-column access."""
         with closing(sqlite3.connect(self.database_path)) as connection:
             connection.row_factory = sqlite3.Row
             return connection.execute(query, values).fetchone()
 
     def database_value(self, query: str, values: tuple = ()):
+        """Return the first column of a single test database row, if present."""
         row = self.database_row(query, values)
         return row[0] if row is not None else None
 
     def crop_id(self, slug: str) -> int:
+        """Look up a test crop identifier by its unique slug."""
         return int(self.database_value("SELECT id FROM crops WHERE slug = ?", (slug,)))
 
     def symptom_id(self, slug: str) -> int:
+        """Look up a test symptom identifier by its unique slug."""
         return int(
             self.database_value("SELECT id FROM symptoms WHERE slug = ?", (slug,))
         )
 
     def disease_id(self, slug: str) -> int:
+        """Look up a test disease identifier by its unique slug."""
         return int(
             self.database_value("SELECT id FROM diseases WHERE slug = ?", (slug,))
         )
 
     def test_all_admin_pages_render(self) -> None:
+        """Verify all administrator pages render for an authorized account."""
         paths = (
             "/admin/dashboard",
             "/admin/users",
@@ -106,6 +101,7 @@ class AdminConsoleTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 200, response.data[:500])
 
     def test_admin_routes_reject_anonymous_and_farmer_accounts(self) -> None:
+        """Verify administrator views reject anonymous visitors and farmer accounts."""
         self.client.post("/logout")
         self.assertEqual(self.client.get("/admin/dashboard").status_code, 302)
         farmer_client = self.app.test_client()
@@ -120,6 +116,7 @@ class AdminConsoleTests(unittest.TestCase):
         self.assertEqual(farmer_client.get("/admin/users").status_code, 403)
 
     def test_crop_can_be_created_and_deleted_but_used_crop_is_protected(self) -> None:
+        """Verify crop CRUD preserves crops referenced by knowledge-base records."""
         response = self.client.post(
             "/admin/crops",
             data={
@@ -154,6 +151,7 @@ class AdminConsoleTests(unittest.TestCase):
         )
 
     def test_disease_symptom_rule_and_treatment_management(self) -> None:
+        """Verify disease, symptom, rule, and recommendation management end to end."""
         tomato_id = self.crop_id("tomato")
         concentric_id = self.symptom_id("concentric_rings_in_spots")
         dark_spot_id = self.symptom_id("dark_lower_leaf_spots")
@@ -263,6 +261,7 @@ class AdminConsoleTests(unittest.TestCase):
         )
 
     def test_user_management_deactivates_and_deletes_farmer(self) -> None:
+        """Verify administrators can deactivate and remove farmer accounts."""
         response = self.client.post(f"/admin/users/{self.farmer_id}/toggle")
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
@@ -279,6 +278,7 @@ class AdminConsoleTests(unittest.TestCase):
         )
 
     def test_admin_can_review_diagnosis_and_private_image(self) -> None:
+        """Verify administrators can review stored diagnosis evidence and images."""
         image_name = "admin-review-test.png"
         self.upload_path.mkdir(parents=True, exist_ok=True)
         (self.upload_path / image_name).write_bytes(b"test image bytes")
@@ -310,6 +310,7 @@ class AdminConsoleTests(unittest.TestCase):
         image.close()
 
     def test_rule_with_history_is_deactivated_instead_of_deleted(self) -> None:
+        """Verify deleting a rule with diagnosis history preserves its evidence."""
         rule_id = int(
             self.database_value(
                 "SELECT id FROM rules WHERE code = 'tomato_early_blight'"
@@ -369,6 +370,7 @@ class AdminConsoleTests(unittest.TestCase):
         self.assertIn(b"Possible early blight.", history_response.data)
 
     def test_reports_render_database_counts(self) -> None:
+        """Verify reports display counts from the seeded test database."""
         response = self.client.get("/admin/reports")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Candidate disease mentions", response.data)

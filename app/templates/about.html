@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}About | CropCare Expert{% endblock %}
+{% block content %}
+<section class="content-panel p-4 p-lg-5">
+  <p class="eyebrow mb-2">About the system</p>
+  <h1 class="h2">An explainable, symptom-based expert system</h1>
+  <p class="lead">CropCare Expert compares farmer-selected symptoms with a knowledge base of crop diseases and IF-THEN production rules.</p>
+  <div class="row g-4 mt-2">
+    <div class="col-md-6">
+      <h2 class="h5">How the rules work</h2>
+      <p>Each rule lists required and supporting symptoms. The system reports matched rules, weighted symptom coverage, possible diseases, and cases where evidence is not strong enough.</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="h5">Images are documentation only</h2>
+      <p>Uploaded crop photographs are not analyzed or sent to an image-recognition model. They are stored with the diagnosis record for the farmer's reference.</p>
+    </div>
+  </div>
+  <div class="alert alert-info mt-3 mb-0" role="note">Results are decision support, not a laboratory-confirmed diagnosis. Seek local agricultural advice when symptoms are severe or unclear.</div>
+</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Create account | CropCare Expert{% endblock %}
+{% block content %}
+<div class="form-panel mx-auto">
+  <p class="eyebrow mb-2">Farmer account</p>
+  <h1 class="h2 mb-4">Create your account</h1>
+  <form method="post" action="{{ url_for('auth.register') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3">
+      <label class="form-label" for="username">Full name</label>
+      <input class="form-control" id="username" name="username" type="text" minlength="2" maxlength="80" autocomplete="name" required value="{{ request.form.get('username', '') }}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="email">Email address</label>
+      <input class="form-control" id="email" name="email" type="email" maxlength="254" autocomplete="email" required value="{{ request.form.get('email', '') }}">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="password">Password</label>
+      <input class="form-control" id="password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+      <div class="form-text">Use at least 8 characters.</div>
+    </div>
+    <div class="mb-4">
+      <label class="form-label" for="confirm_password">Confirm password</label>
+      <input class="form-control" id="confirm_password" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required>
+    </div>
+    <button class="btn btn-success w-100" type="submit">Create farmer account</button>
+  </form>
+  <p class="small text-center mt-3 mb-0">Already registered? <a href="{{ url_for('auth.login') }}">Log in</a>.</p>
+</div>
+{% endblock %}

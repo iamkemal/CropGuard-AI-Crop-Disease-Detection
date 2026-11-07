@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Farmer dashboard | CropCare Expert{% endblock %}
+{% block content %}
+<section class="content-panel p-4 p-lg-5 mb-4">
+  <div class="row align-items-center g-4">
+    <div class="col-lg">
+      <p class="eyebrow mb-2">Farmer dashboard</p>
+      <h1 class="h2">Welcome, {{ user['username'] }}</h1>
+      <p class="lead mb-0">Select a crop and describe what you observe. The system will explain which rules matched.</p>
+    </div>
+    <div class="col-lg-auto">
+      <a class="btn btn-success btn-lg" href="{{ url_for('farmer.crops') }}">Start a diagnosis</a>
+    </div>
+  </div>
+</section>
+<div class="row g-3">
+  <div class="col-md-4">
+    <article class="stat-card h-100">
+      <p class="stat-label">Your diagnoses</p>
+      <p class="stat-value">{{ diagnosis_count }}</p>
+      <a href="{{ url_for('farmer.history') }}">View history</a>
+    </article>
+  </div>
+  <div class="col-md-8">
+    <article class="stat-card h-100">
+      <p class="stat-label">Latest diagnosis</p>
+      {% if latest_diagnosis %}
+        <h2 class="h5">{{ latest_diagnosis['crop_name'] }}{% if latest_diagnosis['disease_name'] %}: {{ latest_diagnosis['disease_name'] }}{% endif %}</h2>
+        <p class="mb-2 text-secondary">{{ latest_diagnosis['created_at'] }} · {{ latest_diagnosis['outcome'].replace('_', ' ')|title }}</p>
+        <a href="{{ url_for('farmer.diagnosis_result', diagnosis_id=latest_diagnosis['id']) }}">Review result</a>
+      {% else %}
+        <p class="mb-0">You have not submitted a diagnosis yet.</p>
+      {% endif %}
+    </article>
+  </div>
+</div>
+{% endblock %}

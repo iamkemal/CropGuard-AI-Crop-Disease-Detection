@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Symptom management | CropCare Expert{% endblock %}
+{% block content %}
+<section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+  <div><p class="eyebrow mb-2">Knowledge base</p><h1 class="h2">Symptoms</h1><p class="text-secondary mb-0">Inactive symptoms stay in historical diagnoses but are not offered to farmers.</p></div>
+  <a class="btn btn-success" href="{{ url_for('admin.new_symptom') }}">Add symptom</a>
+</section>
+<div class="table-responsive content-panel p-3">
+  <table class="table align-middle mb-0">
+    <thead><tr><th>Symptom</th><th>Crop</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for symptom in symptoms %}
+        <tr>
+          <td>{{ symptom['label'] }}<div class="small text-secondary">{{ symptom['slug'] }}</div></td>
+          <td>{{ symptom['crop_name'] }}</td>
+          <td>{{ 'Active' if symptom['is_active'] else 'Inactive' }}</td>
+          <td class="d-flex flex-wrap gap-2">
+            <a class="btn btn-sm btn-outline-success" href="{{ url_for('admin.edit_symptom', symptom_id=symptom['id']) }}">Edit</a>
+            <form method="post" action="{{ url_for('admin.delete_symptom', symptom_id=symptom['id']) }}" onsubmit="return confirm('Delete this symptom?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="text-center text-secondary py-4">No symptoms found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

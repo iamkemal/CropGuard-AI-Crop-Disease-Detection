@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Crop management | CropCare Expert{% endblock %}
+{% block content %}
+<section class="mb-4">
+  <p class="eyebrow mb-2">Knowledge base</p>
+  <h1 class="h2">Crops</h1>
+  <p class="text-secondary">A crop in use by diseases or diagnosis history cannot be deleted; deactivate it to preserve records.</p>
+</section>
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="table-responsive content-panel p-3">
+      <table class="table align-middle mb-0">
+        <thead><tr><th>Crop</th><th>Logo file</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for crop in crops %}
+            <tr>
+              <td>{{ crop['name'] }}<div class="small text-secondary">{{ crop['slug'] }}</div></td>
+              <td>{{ crop['logo_filename'] }}</td>
+              <td>{{ 'Active' if crop['is_active'] else 'Inactive' }}</td>
+              <td class="d-flex flex-wrap gap-2">
+                <a class="btn btn-sm btn-outline-success" href="{{ url_for('admin.edit_crop', crop_id=crop['id']) }}">Edit</a>
+                <form method="post" action="{{ url_for('admin.delete_crop', crop_id=crop['id']) }}" onsubmit="return confirm('Delete this crop?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="text-center text-secondary py-4">No crops found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <section class="content-panel p-4">
+      <h2 class="h5">Add a crop</h2>
+      <form method="post" action="{{ url_for('admin.crops') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3"><label class="form-label" for="slug">Slug</label><input class="form-control" id="slug" name="slug" required maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}"></div>
+        <div class="mb-3"><label class="form-label" for="name">Name</label><input class="form-control" id="name" name="name" required maxlength="80"></div>
+        <div class="mb-3"><label class="form-label" for="description">Description</label><textarea class="form-control" id="description" name="description" required maxlength="1000" rows="3"></textarea></div>
+        <div class="mb-3"><label class="form-label" for="logo_filename">Existing SVG logo filename</label><input class="form-control" id="logo_filename" name="logo_filename" value="maize.svg" required maxlength="84"><div class="form-text">Choose a logo already present in the crop logo folder.</div></div>
+        <div class="mb-3"><label class="form-label" for="is_active">Status</label><select class="form-select" id="is_active" name="is_active"><option value="1" selected>Active</option><option value="0">Inactive</option></select></div>
+        <button class="btn btn-success" type="submit">Add crop</button>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}

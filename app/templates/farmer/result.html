@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Diagnosis result | CropCare Expert{% endblock %}
+{% block content %}
+<section class="content-panel p-4 p-lg-5 mb-4">
+  <p class="eyebrow mb-2">Symptom-based result · {{ diagnosis['crop_name'] }}</p>
+  {% if diagnosis['outcome'] == 'matched' %}
+    <h1 class="h2">Possible disease matches</h1>
+  {% elif diagnosis['outcome'] == 'no_match' %}
+    <h1 class="h2">No stored rule matched</h1>
+  {% else %}
+    <h1 class="h2">More evidence is needed</h1>
+  {% endif %}
+  <p class="lead mb-0">{{ diagnosis['explanation'] }}</p>
+  {% if diagnosis['outcome'] == 'matched' %}
+    <p class="small text-secondary mt-3 mb-0">The weighted rule-match score measures symptom coverage; it is not a probability or confirmed diagnosis.</p>
+  {% endif %}
+</section>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    {% if candidates %}
+      {% for candidate in candidates %}
+        <article class="content-panel p-4 mb-3">
+          <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+            <div>
+              <p class="eyebrow mb-1">Candidate {{ candidate['rank'] }}</p>
+              <h2 class="h3">
+                <a class="text-decoration-none" href="{{ url_for('farmer.disease_detail', disease_slug=candidate['slug']) }}">{{ candidate['name'] }}</a>
+              </h2>
+              {% if candidate['scientific_name'] %}<p class="text-secondary"><em>{{ candidate['scientific_name'] }}</em></p>{% endif %}
+            </div>
+            <div class="score-badge">
+              <strong>{{ "%.0f"|format(candidate['match_score'] * 100) }}%</strong>
+              <span>rule match</span>
+              <span>{{ candidate['confidence_level']|title }} evidence</span>
+            </div>
+          </div>
+          <p>{{ candidate['description'] }}</p>
+          <p><strong>Cause:</strong> {{ candidate['cause'] }}</p>
+          <p>{{ candidate['explanation'] }}</p>
+          <h3 class="h6">Rules that contributed</h3>
+          <ul>
+            {% for rule in candidate['rules'] %}
+              <li><strong>{{ rule['name'] }}:</strong> {{ rule['description'] }}</li>
+            {% endfor %}
+          </ul>
+          {% for category in ['treatment', 'prevention'] %}
+            {% set recommendations = candidate['treatments']|selectattr('category', 'equalto', category)|list %}
+            {% if recommendations %}
+              <h3 class="h6 mt-3">{{ category|title }} and {{ 'prevention' if category == 'treatment' else 'care' }}</h3>
+              <ul>
+                {% for recommendation in recommendations %}
+                  <li>{{ recommendation['recommendation'] }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          {% endfor %}
+          {% if candidate['sources'] %}
+            <h3 class="h6 mt-3">Agricultural references</h3>
+            <ul class="small mb-0">
+              {% for source in candidate['sources'] %}
+                <li><a href="{{ source['url'] }}" target="_blank" rel="noopener noreferrer">{{ source['title'] }}</a> — {{ source['organization'] }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </article>
+      {% endfor %}
+    {% else %}
+      <section class="content-panel p-4">
+        <h2 class="h5">What you can do next</h2>
+        <p class="mb-0">Recheck the plant and select any additional symptoms you observe. If symptoms are severe, spreading, or unclear, consult a local agricultural adviser.</p>
+      </section>
+    {% endif %}
+  </div>
+  <aside class="col-lg-4">
+    <section class="content-panel p-4 mb-3">
+      <h2 class="h5">Symptoms selected</h2>
+      {% if selected_symptoms %}
+        <ul class="mb-0">
+          {% for symptom in selected_symptoms %}<li>{{ symptom['label'] }}</li>{% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-secondary mb-0">No symptoms were selected.</p>
+      {% endif %}
+    </section>
+    {% if diagnosis['image_path'] %}
+      <section class="content-panel p-3">
+        <h2 class="h6">Your uploaded photo</h2>
+        <a href="{{ url_for('farmer.diagnosis_image', diagnosis_id=diagnosis['id']) }}">
+          <img class="history-image" src="{{ url_for('farmer.diagnosis_image', diagnosis_id=diagnosis['id']) }}" alt="Uploaded crop documentation">
+        </a>
+        <p class="small text-secondary mt-2 mb-0">Stored as documentation only; not used by the inference engine.</p>
+      </section>
+    {% endif %}
+  </aside>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-4">
+  <a class="btn btn-success" href="{{ url_for('farmer.crops') }}">Start another diagnosis</a>
+  <a class="btn btn-outline-success" href="{{ url_for('farmer.history') }}">View diagnosis history</a>
+</div>
+{% endblock %}

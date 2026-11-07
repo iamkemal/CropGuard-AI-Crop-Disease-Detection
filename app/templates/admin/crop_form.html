@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Edit crop | CropCare Expert{% endblock %}
+{% block content %}
+<section class="form-panel mx-auto">
+  <p class="eyebrow mb-2">Knowledge base</p>
+  <h1 class="h2 mb-4">Edit {{ crop['name'] }}</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3"><label class="form-label" for="slug">Slug</label><input class="form-control" id="slug" name="slug" required maxlength="80" value="{{ crop['slug'] }}"></div>
+    <div class="mb-3"><label class="form-label" for="name">Name</label><input class="form-control" id="name" name="name" required maxlength="80" value="{{ crop['name'] }}"></div>
+    <div class="mb-3"><label class="form-label" for="description">Description</label><textarea class="form-control" id="description" name="description" required maxlength="1000" rows="4">{{ crop['description'] }}</textarea></div>
+    <div class="mb-3"><label class="form-label" for="logo_filename">Existing SVG logo filename</label><input class="form-control" id="logo_filename" name="logo_filename" required maxlength="84" value="{{ crop['logo_filename'] }}"></div>
+    <div class="mb-4"><label class="form-label" for="is_active">Status</label><select class="form-select" id="is_active" name="is_active"><option value="1" {% if crop['is_active'] %}selected{% endif %}>Active</option><option value="0" {% if not crop['is_active'] %}selected{% endif %}>Inactive</option></select></div>
+    <div class="d-flex gap-2"><button class="btn btn-success" type="submit">Save changes</button><a class="btn btn-outline-secondary" href="{{ url_for('admin.crops') }}">Cancel</a></div>
+  </form>
+</section>
+{% endblock %}

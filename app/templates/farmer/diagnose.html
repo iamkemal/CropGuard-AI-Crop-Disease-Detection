@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ crop['name'] }} symptoms | CropCare Expert{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+  <img class="crop-logo crop-logo-small" src="{{ url_for('static', filename='images/logos/' ~ crop['logo_filename']) }}" alt="{{ crop['name'] }} crop logo">
+  <div>
+    <p class="eyebrow mb-1">Symptom assessment</p>
+    <h1 class="h2 mb-0">{{ crop['name'] }}</h1>
+  </div>
+</div>
+<form method="post" enctype="multipart/form-data" class="diagnosis-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <section class="content-panel p-4 mb-4" aria-labelledby="symptoms-heading">
+    <h2 class="h4" id="symptoms-heading">Select all symptoms you can observe</h2>
+    <p class="text-secondary">Choose only symptoms you have seen on the plant. More specific observations help the rules distinguish possible causes.</p>
+    <div class="row g-2">
+      {% for symptom in symptoms %}
+        <div class="col-md-6">
+          <label class="symptom-option">
+            <input class="form-check-input mt-1" type="checkbox" name="symptoms" value="{{ symptom['slug'] }}" {% if symptom['slug'] in selected_symptoms %}checked{% endif %}>
+            <span>
+              <strong>{{ symptom['label'] }}</strong>
+              <span class="d-block small text-secondary">{{ symptom['description'] }}</span>
+            </span>
+          </label>
+        </div>
+      {% else %}
+        <p class="mb-0">No active symptoms are configured for this crop.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="content-panel p-4 mb-4" aria-labelledby="image-heading">
+    <h2 class="h4" id="image-heading">Add a crop photo <span class="text-secondary fw-normal">(optional)</span></h2>
+    <p class="text-secondary">A photo is stored with this record for your reference. It is not analyzed by the diagnosis engine.</p>
+    <label class="form-label fw-semibold" for="cropImage">Plant image</label>
+    <input class="form-control" id="cropImage" name="crop_image" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+    <div class="form-text">JPG, JPEG, PNG, or WEBP; maximum 5 MB.</div>
+    <div class="image-preview-wrap mt-3" id="imagePreviewWrap" hidden>
+      <img class="image-preview" id="cropImagePreview" alt="Preview of the selected crop photo">
+      <p class="small text-secondary mt-2 mb-0">Preview only; the image does not affect rule matching.</p>
+    </div>
+  </section>
+  <div class="d-flex flex-wrap gap-2">
+    <button class="btn btn-success btn-lg" type="submit">Get symptom-based results</button>
+    <a class="btn btn-outline-secondary btn-lg" href="{{ url_for('farmer.crops') }}">Choose another crop</a>
+  </div>
+</form>
+<script src="{{ url_for('static', filename='js/upload-preview.js') }}" defer></script>
+{% endblock %}

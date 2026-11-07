@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Diagnosis #{{ diagnosis['id'] }} | CropCare Expert{% endblock %}
+{% block content %}
+<section class="content-panel p-4 p-lg-5 mb-4">
+  <p class="eyebrow mb-2">Diagnosis record #{{ diagnosis['id'] }}</p>
+  <h1 class="h2">{{ diagnosis['crop_name'] }} · {{ diagnosis['outcome'].replace('_', ' ')|title }}</h1>
+  <p class="text-secondary">Farmer: {{ diagnosis['username'] or 'Deleted account' }} · {{ diagnosis['created_at'] }}</p>
+  <p class="lead mb-0">{{ diagnosis['explanation'] }}</p>
+</section>
+<div class="row g-4">
+  <div class="col-lg-7">
+    <section class="content-panel p-4 mb-4">
+      <h2 class="h5">Selected symptoms</h2>
+      <ul class="mb-0">{% for symptom in selected_symptoms %}<li>{{ symptom['label'] }}</li>{% else %}<li>No symptoms selected.</li>{% endfor %}</ul>
+    </section>
+    <section class="content-panel p-4">
+      <h2 class="h5">Matching disease candidates</h2>
+      <ul class="mb-0">
+        {% for candidate in candidates %}
+          <li class="mb-2"><strong>{{ candidate['rank'] }}. {{ candidate['name'] }}</strong> · {{ "%.0f"|format(candidate['match_score'] * 100) }}% weighted rule match ({{ candidate['confidence_level'] }} evidence)<br><span class="small text-secondary">{{ candidate['explanation'] }}</span></li>
+        {% else %}
+          <li>No disease rule matched.</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+  <div class="col-lg-5">
+    {% if diagnosis['image_path'] %}
+      <section class="content-panel p-3">
+        <h2 class="h6">Uploaded crop image</h2>
+        <a href="{{ url_for('admin.diagnosis_image', diagnosis_id=diagnosis['id']) }}"><img class="history-image" src="{{ url_for('admin.diagnosis_image', diagnosis_id=diagnosis['id']) }}" alt="Farmer's uploaded crop documentation"></a>
+      </section>
+    {% else %}
+      <section class="content-panel p-4"><p class="mb-0">No image was uploaded for this diagnosis.</p></section>
+    {% endif %}
+  </div>
+</div>
+<a class="btn btn-outline-success mt-4" href="{{ url_for('admin.diagnoses') }}">Back to diagnosis records</a>
+{% endblock %}

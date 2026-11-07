@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if symptom else 'Add' }} symptom | CropCare Expert{% endblock %}
+{% block content %}
+<section class="form-panel mx-auto">
+  <p class="eyebrow mb-2">Knowledge base</p>
+  <h1 class="h2 mb-4">{{ 'Edit symptom' if symptom else 'Add symptom' }}</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3"><label class="form-label" for="crop_id">Crop</label><select class="form-select" id="crop_id" name="crop_id" required><option value="">Choose a crop</option>{% for crop in crops %}<option value="{{ crop['id'] }}" {% if symptom and symptom['crop_id'] == crop['id'] %}selected{% endif %}>{{ crop['name'] }}</option>{% endfor %}</select></div>
+    <div class="mb-3"><label class="form-label" for="slug">Slug</label><input class="form-control" id="slug" name="slug" maxlength="80" required value="{{ symptom['slug'] if symptom else '' }}"></div>
+    <div class="mb-3"><label class="form-label" for="label">Farmer-facing label</label><input class="form-control" id="label" name="label" maxlength="160" required value="{{ symptom['label'] if symptom else '' }}"></div>
+    <div class="mb-3"><label class="form-label" for="description">Description</label><textarea class="form-control" id="description" name="description" maxlength="1000" rows="4" required>{{ symptom['description'] if symptom else '' }}</textarea></div>
+    <div class="mb-4"><label class="form-label" for="is_active">Status</label><select class="form-select" id="is_active" name="is_active"><option value="1" {% if not symptom or symptom['is_active'] %}selected{% endif %}>Active</option><option value="0" {% if symptom and not symptom['is_active'] %}selected{% endif %}>Inactive</option></select></div>
+    <div class="d-flex gap-2"><button class="btn btn-success" type="submit">Save symptom</button><a class="btn btn-outline-secondary" href="{{ url_for('admin.symptoms') }}">Cancel</a></div>
+  </form>
+</section>
+{% endblock %}

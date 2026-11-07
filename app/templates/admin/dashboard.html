@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard | CropCare Expert{% endblock %}
+{% block content %}
+<section class="mb-4">
+  <p class="eyebrow mb-2">Administration</p>
+  <h1 class="h2">System overview</h1>
+  <p class="text-secondary">Administrative access is restricted to provisioned administrator accounts.</p>
+</section>
+<div class="row g-3">
+  <div class="col-sm-4">
+    <article class="stat-card h-100">
+      <p class="stat-label">Farmers</p>
+      <p class="stat-value">{{ counts['users'] }}</p>
+    </article>
+  </div>
+  <div class="col-sm-4">
+    <article class="stat-card h-100">
+      <p class="stat-label">Active diseases</p>
+      <p class="stat-value">{{ counts['diseases'] }}</p>
+    </article>
+  </div>
+  <div class="col-sm-4">
+    <article class="stat-card h-100">
+      <p class="stat-label">Diagnoses</p>
+      <p class="stat-value">{{ counts['diagnoses'] }}</p>
+    </article>
+  </div>
+  <div class="col-sm-4">
+    <article class="stat-card h-100">
+      <p class="stat-label">Active rules</p>
+      <p class="stat-value">{{ counts['rules'] }}</p>
+    </article>
+  </div>
+</div>
+<section class="content-panel p-4 mt-4">
+  <h2 class="h5">Manage the system</h2>
+  <div class="admin-link-grid mt-3">
+    <a href="{{ url_for('admin.users') }}">Registered farmers</a>
+    <a href="{{ url_for('admin.crops') }}">Crops</a>
+    <a href="{{ url_for('admin.diseases') }}">Diseases</a>
+    <a href="{{ url_for('admin.symptoms') }}">Symptoms</a>
+    <a href="{{ url_for('admin.rules') }}">IF-THEN rules</a>
+    <a href="{{ url_for('admin.treatments') }}">Treatments</a>
+    <a href="{{ url_for('admin.diagnoses') }}">Diagnosis records and images</a>
+    <a href="{{ url_for('admin.reports') }}">System reports</a>
+  </div>
+</section>
+{% endblock %}

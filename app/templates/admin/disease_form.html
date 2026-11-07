@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if disease else 'Add' }} disease | CropCare Expert{% endblock %}
+{% block content %}
+<section class="form-panel mx-auto wide-form">
+  <p class="eyebrow mb-2">Knowledge base</p>
+  <h1 class="h2 mb-4">{{ 'Edit disease' if disease else 'Add disease' }}</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3"><label class="form-label" for="crop_id">Crop</label><select class="form-select" id="crop_id" name="crop_id" required><option value="">Choose a crop</option>{% for crop in crops %}<option value="{{ crop['id'] }}" {% if (disease and disease['crop_id'] == crop['id']) %}selected{% endif %}>{{ crop['name'] }}</option>{% endfor %}</select></div>
+    <div class="mb-3"><label class="form-label" for="slug">Slug</label><input class="form-control" id="slug" name="slug" maxlength="80" required value="{{ disease['slug'] if disease else '' }}"></div>
+    <div class="mb-3"><label class="form-label" for="name">Disease name</label><input class="form-control" id="name" name="name" maxlength="120" required value="{{ disease['name'] if disease else '' }}"></div>
+    <div class="mb-3"><label class="form-label" for="scientific_name">Scientific name</label><input class="form-control" id="scientific_name" name="scientific_name" maxlength="160" value="{{ disease['scientific_name'] if disease and disease['scientific_name'] else '' }}"></div>
+    <div class="mb-3"><label class="form-label" for="description">Description</label><textarea class="form-control" id="description" name="description" rows="3" maxlength="3000" required>{{ disease['description'] if disease else '' }}</textarea></div>
+    <div class="mb-3"><label class="form-label" for="cause">Cause and spread</label><textarea class="form-control" id="cause" name="cause" rows="3" maxlength="2000" required>{{ disease['cause'] if disease else '' }}</textarea></div>
+    <div class="mb-3"><label class="form-label" for="is_active">Status</label><select class="form-select" id="is_active" name="is_active"><option value="1" {% if not disease or disease['is_active'] %}selected{% endif %}>Active</option><option value="0" {% if disease and not disease['is_active'] %}selected{% endif %}>Inactive</option></select></div>
+    <fieldset class="mb-3">
+      <legend class="h6">Associated symptoms</legend>
+      <p class="small text-secondary">Choose symptoms for the selected crop. Mark the most distinctive signs as key.</p>
+      {% for crop in crops %}
+        <div class="mb-3">
+          <div class="small fw-bold mb-2">{{ crop['name'] }}</div>
+          {% for symptom in symptoms_by_crop[crop['id']] %}
+            <div class="form-check">
+              <input class="form-check-input" id="symptom-{{ symptom['id'] }}" type="checkbox" name="symptom_ids" value="{{ symptom['id'] }}" {% if symptom['id'] in selected_ids %}checked{% endif %}>
+              <label class="form-check-label" for="symptom-{{ symptom['id'] }}">{{ symptom['label'] }}</label>
+              <input class="form-check-input ms-3" id="key-{{ symptom['id'] }}" type="checkbox" name="key_symptom_ids" value="{{ symptom['id'] }}" {% if symptom['id'] in key_ids %}checked{% endif %}>
+              <label class="form-check-label small" for="key-{{ symptom['id'] }}">Key sign</label>
+            </div>
+          {% else %}
+            <p class="small text-secondary">No active symptoms for this crop.</p>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </fieldset>
+    <div class="d-flex flex-wrap gap-2"><button class="btn btn-success" type="submit">Save disease</button><a class="btn btn-outline-secondary" href="{{ url_for('admin.diseases') }}">Cancel</a></div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">Maize crop logo</title>
+  <desc id="desc">A golden maize cob with green leaves inside a circular badge.</desc>
+  <circle cx="80" cy="80" r="73" fill="#f3f8e8" stroke="#236b45" stroke-width="6"/>
+  <path d="M47 125c18-11 24-29 25-57l8 24c-1 18-10 33-27 43z" fill="#27804a"/>
+  <path d="M111 126c-18-11-24-29-25-57l-8 24c1 18 10 33 27 43z" fill="#398f4c"/>
+  <path d="M62 43c0-9 8-16 18-16s18 7 18 16v53c0 17-8 29-18 29S62 113 62 96z" fill="#efc443" stroke="#b88919" stroke-width="3"/>
+  <path d="M69 51h22M68 62h24M67 73h26M67 84h26M68 95h24M71 106h18" fill="none" stroke="#d09e21" stroke-width="3" stroke-linecap="round"/>
+  <path d="M76 30c-7-8-16-9-24-5 5 9 13 13 23 11M84 30c7-8 16-9 24-5-5 9-13 13-23 11" fill="#3c8d45"/>
+</svg>

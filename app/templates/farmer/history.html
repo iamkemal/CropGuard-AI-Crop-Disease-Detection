@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Diagnosis history | CropCare Expert{% endblock %}
+{% block content %}
+<section class="mb-4">
+  <p class="eyebrow mb-2">Farmer records</p>
+  <h1 class="h2">Diagnosis history</h1>
+  <p class="text-secondary">Only your own diagnosis records and uploaded images are shown here.</p>
+</section>
+<div class="row g-3">
+  {% for diagnosis in diagnoses %}
+    <div class="col-12">
+      <article class="history-card">
+        {% if diagnosis['image_path'] %}
+          <a class="history-thumb-link" href="{{ url_for('farmer.diagnosis_image', diagnosis_id=diagnosis['id']) }}">
+            <img class="history-thumb" src="{{ url_for('farmer.diagnosis_image', diagnosis_id=diagnosis['id']) }}" alt="Photo uploaded with diagnosis {{ diagnosis['id'] }}">
+          </a>
+        {% endif %}
+        <div class="flex-grow-1">
+          <p class="eyebrow mb-1">{{ diagnosis['crop_name'] }} · {{ diagnosis['outcome'].replace('_', ' ')|title }}</p>
+          <h2 class="h5 mb-1">{{ diagnosis['disease_name'] or 'No disease rule matched' }}</h2>
+          <p class="small text-secondary mb-2">{{ diagnosis['created_at'] }}</p>
+          <a href="{{ url_for('farmer.diagnosis_result', diagnosis_id=diagnosis['id']) }}">View result</a>
+        </div>
+      </article>
+    </div>
+  {% else %}
+    <div class="col-12">
+      <section class="content-panel p-4">
+        <p class="mb-3">No diagnoses have been saved yet.</p>
+        <a class="btn btn-success" href="{{ url_for('farmer.crops') }}">Start your first diagnosis</a>
+      </section>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Diagnosis records | CropCare Expert{% endblock %}
+{% block content %}
+<section class="mb-4">
+  <p class="eyebrow mb-2">Farmer records</p>
+  <h1 class="h2">Diagnosis records</h1>
+  <p class="text-secondary">Showing the latest 200 records. Uploaded images remain private and are available only to the record owner and administrators.</p>
+</section>
+<div class="table-responsive content-panel p-3">
+  <table class="table align-middle mb-0">
+    <thead><tr><th>Date</th><th>Farmer</th><th>Crop</th><th>Top candidate</th><th>Outcome</th><th>Image</th><th></th></tr></thead>
+    <tbody>
+      {% for diagnosis in diagnoses %}
+        <tr>
+          <td>{{ diagnosis['created_at'] }}</td><td>{{ diagnosis['username'] or 'Deleted account' }}</td><td>{{ diagnosis['crop_name'] }}</td>
+          <td>{{ diagnosis['disease_name'] or '—' }}</td><td>{{ diagnosis['outcome'].replace('_', ' ')|title }}</td>
+          <td>{% if diagnosis['image_path'] %}<a href="{{ url_for('admin.diagnosis_image', diagnosis_id=diagnosis['id']) }}">View image</a>{% else %}—{% endif %}</td>
+          <td><a class="btn btn-sm btn-outline-success" href="{{ url_for('admin.diagnosis_detail', diagnosis_id=diagnosis['id']) }}">Details</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="text-center text-secondary py-4">No diagnosis records yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

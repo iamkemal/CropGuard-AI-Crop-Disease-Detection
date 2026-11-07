@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ disease['name'] }} | CropCare Expert{% endblock %}
+{% block content %}
+<section class="content-panel p-4 p-lg-5 mb-4">
+  <p class="eyebrow mb-2">{{ disease['crop_name'] }} disease information</p>
+  <h1 class="h2">{{ disease['name'] }}</h1>
+  {% if disease['scientific_name'] %}<p class="text-secondary"><em>{{ disease['scientific_name'] }}</em></p>{% endif %}
+  <p class="lead">{{ disease['description'] }}</p>
+  <p class="mb-0"><strong>Cause and spread:</strong> {{ disease['cause'] }}</p>
+</section>
+<div class="row g-4">
+  <div class="col-lg-6">
+    <section class="content-panel p-4 h-100">
+      <h2 class="h5">Associated symptoms</h2>
+      <ul class="mb-0">
+        {% for symptom in symptoms %}
+          <li class="mb-2"><strong>{{ symptom['label'] }}{% if symptom['is_key'] %} (key sign){% endif %}</strong><br><span class="small text-secondary">{{ symptom['description'] }}</span></li>
+        {% else %}
+          <li>No symptoms are currently associated with this disease.</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+  <div class="col-lg-6">
+    <section class="content-panel p-4 h-100">
+      <h2 class="h5">Recommendations</h2>
+      {% for category in ['treatment', 'prevention'] %}
+        {% set recommendations = treatments|selectattr('category', 'equalto', category)|list %}
+        {% if recommendations %}
+          <h3 class="h6 mt-3">{{ category|title }}</h3>
+          <ul>{% for item in recommendations %}<li>{{ item['recommendation'] }}</li>{% endfor %}</ul>
+        {% endif %}
+      {% endfor %}
+      <p class="small text-secondary mb-0">Use only locally registered crop-protection products and follow their labels. Seek local agricultural advice for severe or uncertain cases.</p>
+    </section>
+  </div>
+</div>
+{% if sources %}
+  <section class="content-panel p-4 mt-4">
+    <h2 class="h5">Agricultural references</h2>
+    <ul class="mb-0">
+      {% for source in sources %}
+        <li><a href="{{ source['url'] }}" target="_blank" rel="noopener noreferrer">{{ source['title'] }}</a> — {{ source['organization'] }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}
+{% endblock %}

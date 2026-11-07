@@ -1,0 +1,260 @@
+:root {
+  --agri-green: #236b45;
+  --agri-green-dark: #174b31;
+  --agri-green-soft: #eaf3ed;
+  --agri-cream: #f7f8f3;
+  --agri-ink: #20342a;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--agri-cream);
+  color: var(--agri-ink);
+}
+
+.site-nav {
+  background: var(--agri-green-dark);
+}
+
+.hero-panel {
+  overflow: hidden;
+  border: 1px solid #dce8dd;
+  border-radius: 1.25rem;
+  background: linear-gradient(120deg, #eef5eb, #ffffff 68%);
+}
+
+.eyebrow {
+  color: var(--agri-green);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.hero-note,
+.content-panel,
+.form-panel,
+.stat-card {
+  border: 1px solid #e0e8df;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 0.4rem 1.5rem rgb(30 61 39 / 5%);
+}
+
+.hero-note {
+  padding: 1.5rem;
+}
+
+.note-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  background: var(--agri-green-soft);
+  color: var(--agri-green);
+  font-weight: 800;
+}
+
+.crop-card {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1.5rem;
+  border: 1px solid #e0e8df;
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.crop-logo {
+  width: 4.5rem;
+  height: 4.5rem;
+  flex: 0 0 auto;
+}
+
+.crop-logo-large {
+  width: 6rem;
+  height: 6rem;
+}
+
+.crop-logo-small {
+  width: 3.75rem;
+  height: 3.75rem;
+}
+
+.crop-choice {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e0e8df;
+  border-radius: 1rem;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.crop-choice:hover,
+.crop-choice:focus-visible {
+  border-color: #75a788;
+  box-shadow: 0 0.4rem 1.5rem rgb(30 61 39 / 8%);
+}
+
+.form-panel {
+  max-width: 32rem;
+  padding: 2rem;
+}
+
+.form-control:focus {
+  border-color: #75a788;
+  box-shadow: 0 0 0 0.2rem rgb(35 107 69 / 14%);
+}
+
+.btn-success {
+  --bs-btn-bg: var(--agri-green);
+  --bs-btn-border-color: var(--agri-green);
+  --bs-btn-hover-bg: var(--agri-green-dark);
+  --bs-btn-hover-border-color: var(--agri-green-dark);
+}
+
+.stat-card {
+  padding: 1.5rem;
+}
+
+.wide-form {
+  max-width: 52rem;
+}
+
+.admin-link-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-link-grid a {
+  padding: 0.85rem 1rem;
+  border: 1px solid #e0e8df;
+  border-radius: 0.75rem;
+  color: var(--agri-green-dark);
+  text-decoration: none;
+}
+
+.admin-link-grid a:hover,
+.admin-link-grid a:focus-visible {
+  border-color: #75a788;
+  background: #f0f7f1;
+}
+
+.stat-label {
+  margin-bottom: 0.5rem;
+  color: #5d7164;
+  font-weight: 600;
+}
+
+.stat-value {
+  margin: 0;
+  color: var(--agri-green-dark);
+  font-size: 2.25rem;
+  font-weight: 750;
+}
+
+.site-footer {
+  background: #edf2eb;
+  color: #53665a;
+}
+
+.symptom-option {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #e0e8df;
+  border-radius: 0.75rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+.symptom-option:has(input:checked) {
+  border-color: var(--agri-green);
+  background: #f0f7f1;
+}
+
+.image-preview-wrap {
+  max-width: 24rem;
+}
+
+.image-preview,
+.history-image {
+  display: block;
+  max-width: 100%;
+  max-height: 22rem;
+  border-radius: 0.75rem;
+  object-fit: contain;
+  background: #f3f5f1;
+}
+
+.score-badge {
+  display: grid;
+  min-width: 6.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--agri-green-soft);
+  color: var(--agri-green-dark);
+  text-align: center;
+}
+
+.score-badge strong {
+  font-size: 1.4rem;
+}
+
+.score-badge span {
+  font-size: 0.76rem;
+}
+
+.history-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e0e8df;
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.history-thumb-link,
+.history-thumb {
+  width: 6rem;
+  height: 6rem;
+  flex: 0 0 auto;
+}
+
+.history-thumb {
+  border-radius: 0.75rem;
+  object-fit: cover;
+  background: #f3f5f1;
+}
+
+@media (max-width: 575.98px) {
+  .form-panel {
+    padding: 1.5rem;
+  }
+
+  .crop-choice {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .crop-logo-large {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+
+  .history-card {
+    align-items: flex-start;
+  }
+}

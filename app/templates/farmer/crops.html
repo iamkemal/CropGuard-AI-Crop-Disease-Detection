@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Select a crop | CropCare Expert{% endblock %}
+{% block content %}
+<section class="mb-4">
+  <p class="eyebrow mb-2">New diagnosis</p>
+  <h1 class="h2">Which crop needs attention?</h1>
+  <p class="text-secondary">Choose the crop affected by the symptoms you observed.</p>
+</section>
+<div class="row g-3">
+  {% for crop in crops %}
+    <div class="col-md-6">
+      <a class="crop-choice" href="{{ url_for('farmer.crop_diagnosis', crop_slug=crop['slug']) }}">
+        <img class="crop-logo crop-logo-large" src="{{ url_for('static', filename='images/logos/' ~ crop['logo_filename']) }}" alt="{{ crop['name'] }} crop logo">
+        <div>
+          <h2 class="h4">{{ crop['name'] }}</h2>
+          <p class="mb-3">{{ crop['description'] }}</p>
+          <span class="btn btn-success">Select {{ crop['name'] }}</span>
+        </div>
+      </a>
+    </div>
+  {% else %}
+    <div class="col-12"><div class="alert alert-warning">No active crops are available.</div></div>
+  {% endfor %}
+</div>
+{% endblock %}

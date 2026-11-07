@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}CropCare Expert | Home{% endblock %}
+{% block content %}
+<section class="hero-panel p-4 p-lg-5 mb-5">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-8">
+      <p class="eyebrow mb-2">Bosaso, Puntland</p>
+      <h1 class="display-5 fw-bold">Clearer crop decisions, guided by symptoms.</h1>
+      <p class="lead mt-3 mb-4">A rule-based expert system that helps farmers explore possible maize and tomato diseases and practical next steps.</p>
+      <div class="d-flex flex-wrap gap-2">
+        {% if g.get('user') %}
+          {% if g.user['role'] == 'admin' %}
+            <a class="btn btn-success btn-lg" href="{{ url_for('admin.dashboard') }}">Open dashboard</a>
+          {% else %}
+            <a class="btn btn-success btn-lg" href="{{ url_for('farmer.dashboard') }}">Open dashboard</a>
+          {% endif %}
+        {% else %}
+          <a class="btn btn-success btn-lg" href="{{ url_for('auth.register') }}">Get started</a>
+          <a class="btn btn-outline-success btn-lg" href="{{ url_for('about') }}">Learn how it works</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="hero-note">
+        <span class="note-icon" aria-hidden="true">✓</span>
+        <h2 class="h5">Transparent by design</h2>
+        <p class="mb-0">Every suggestion is based on selected symptoms and stored IF-THEN rules. Uploaded images will be kept as documentation, not classified by AI.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="crops-title">
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+      <p class="eyebrow mb-1">Supported crops</p>
+      <h2 class="h3 mb-0" id="crops-title">Start with your crop</h2>
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <article class="crop-card crop-card-maize h-100">
+        <img class="crop-logo" src="{{ url_for('static', filename='images/logos/maize.svg') }}" alt="Maize crop logo">
+        <div>
+          <h3 class="h4">Maize</h3>
+          <p class="mb-0">Explore rule-based guidance for common maize leaf and virus symptoms.</p>
+        </div>
+      </article>
+    </div>
+    <div class="col-md-6">
+      <article class="crop-card crop-card-tomato h-100">
+        <img class="crop-logo" src="{{ url_for('static', filename='images/logos/tomato.svg') }}" alt="Tomato crop logo">
+        <div>
+          <h3 class="h4">Tomato</h3>
+          <p class="mb-0">Review symptoms and possible matches for common tomato diseases.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+{% endblock %}

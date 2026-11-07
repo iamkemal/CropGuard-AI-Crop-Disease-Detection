@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}System reports | CropCare Expert{% endblock %}
+{% block content %}
+<section class="mb-4">
+  <p class="eyebrow mb-2">System reports</p>
+  <h1 class="h2">Usage and diagnosis summary</h1>
+  <p class="text-secondary">Counts are generated directly from the current SQLite records.</p>
+</section>
+<div class="row g-3 mb-4">
+  <div class="col-sm-3"><article class="stat-card h-100"><p class="stat-label">Farmers</p><p class="stat-value">{{ summary['farmers'] }}</p></article></div>
+  <div class="col-sm-3"><article class="stat-card h-100"><p class="stat-label">Active farmers</p><p class="stat-value">{{ summary['active_farmers'] }}</p></article></div>
+  <div class="col-sm-3"><article class="stat-card h-100"><p class="stat-label">Diagnoses</p><p class="stat-value">{{ summary['diagnoses'] }}</p></article></div>
+  <div class="col-sm-3"><article class="stat-card h-100"><p class="stat-label">With images</p><p class="stat-value">{{ summary['images'] }}</p></article></div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-6">
+    <section class="content-panel p-4 h-100">
+      <h2 class="h5">Diagnoses by crop</h2>
+      <div class="table-responsive"><table class="table mb-0"><thead><tr><th>Crop</th><th>Records</th></tr></thead><tbody>{% for row in by_crop %}<tr><td>{{ row['name'] }}</td><td>{{ row['diagnosis_count'] }}</td></tr>{% else %}<tr><td colspan="2">No data</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+  </div>
+  <div class="col-lg-6">
+    <section class="content-panel p-4 h-100">
+      <h2 class="h5">Outcomes</h2>
+      <div class="table-responsive"><table class="table mb-0"><thead><tr><th>Outcome</th><th>Records</th></tr></thead><tbody>{% for row in by_outcome %}<tr><td>{{ row['outcome'].replace('_', ' ')|title }}</td><td>{{ row['diagnosis_count'] }}</td></tr>{% else %}<tr><td colspan="2">No data</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+  </div>
+  <div class="col-12">
+    <section class="content-panel p-4">
+      <h2 class="h5">Candidate disease mentions</h2>
+      <p class="small text-secondary">A diagnosis with multiple candidates counts once for each candidate listed.</p>
+      <div class="table-responsive"><table class="table mb-0"><thead><tr><th>Crop</th><th>Disease</th><th>Diagnosis records</th></tr></thead><tbody>{% for row in by_disease %}<tr><td>{{ row['crop_name'] }}</td><td>{{ row['disease_name'] }}</td><td>{{ row['diagnosis_count'] }}</td></tr>{% else %}<tr><td colspan="3">No data</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+  </div>
+</div>
+{% endblock %}

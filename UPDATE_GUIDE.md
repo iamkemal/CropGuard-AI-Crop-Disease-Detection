@@ -1,66 +1,68 @@
-# Sida repository-ga loogu cusboonaysiiyo ZIP-kan
+# How to update the repository using this ZIP
 
-## 1. Soo qaado isbeddellada GitHub
+## 1. Pull the latest changes from GitHub
 
-GitHub Desktop ka dooro **CropGuard-AI-Crop-Disease-Detection**. Riix
-**Fetch origin**, kadib **Pull origin** haddii uu soo muuqdo. Tani waxay soo
-qaadaysaa workflows-kii aad browser-ka ku beddeshay.
+In GitHub Desktop, select **CropGuard-AI-Crop-Disease-Detection**. Click
+**Fetch origin**, then **Pull origin** if it appears. This downloads the
+workflow changes you made in the browser.
 
-## 2. Ku koobiyee code-ka la saxay
+## 2. Copy the corrected code
 
-1. ZIP-kan ka dooro **Extract All**.
-2. Fur folder-ka gudaha ilaa aad aragto `app`, `tests`, `run.py`, iyo
+1. Right-click this ZIP file and select **Extract All**.
+2. Open the inner project folder until you see `app`, `tests`, `run.py`, and
    `requirements.txt`.
-3. GitHub Desktop ka riix **Repository > Show in Explorer**.
-4. Waxa ku jira folder-ka ZIP-ka oo dhan ku koobiyee folder-ka repository-ga.
-   Ku dar `.github`, `.gitignore`, iyo `requirements-dev.txt`.
-5. Haddii isku magac files ahi jiraan, dooro **Replace the files in the destination**.
+3. In GitHub Desktop, select **Repository > Show in Explorer**.
+4. Copy all the contents of the extracted project folder into the repository
+   folder. Include `.github`, `.gitignore`, and `requirements-dev.txt`.
+5. If files with the same names already exist, choose
+   **Replace the files in the destination**.
 
-ZIP-ku wuxuu hayaa source-ka project-ka; `.git`, `.venv`, database-ka iyo
-uploads-ka `instance/` kuma jiraan. Ku koobiyee files-ka folder-ka repository-ga
-adigoo aan tirtirayn folder-kaas.
+The ZIP contains the project's source code. It does not include `.git`,
+`.venv`, the database, or the uploads stored in `instance/`. Copy the files
+into the existing repository folder without deleting that folder.
 
-## 3. U dir GitHub
+## 3. Push the changes to GitHub
 
-1. Ku noqo GitHub Desktop oo eeg **Changes**.
-2. **Summary** ku qor: `Fix Python CI and resolve Pylint findings`.
-3. Riix **Commit to main**, kadib **Push origin**.
-4. GitHub ka fur **Actions** oo eeg run-yada commit-ka cusub:
-   **Pylint** iyo **Python tests**.
+1. Return to GitHub Desktop and review **Changes**.
+2. In **Summary**, enter: `Fix Python CI and resolve Pylint findings`.
+3. Click **Commit to main**, then **Push origin**.
+4. On GitHub, open **Actions** and check the runs for the new commit:
+   **Pylint** and **Python tests**.
 
-Run-yadii hore ee casaanka ahaa waa taariikhda commits-kii hore. Natiijada
-isbeddelkan ka eeg run-yada cusub ee push-kan ka dhasha.
+The earlier failed runs remain as part of the history of previous commits.
+Check the new runs triggered by this push to see the results of these changes.
 
-## Waxa la saxay
+## What was fixed
 
-- Labada workflow waxay isticmaalaan Python 3.12, Ubuntu 24.04, iyo
+- Both workflows use Python 3.12, Ubuntu 24.04, and
   `actions/setup-python@v6`.
-- `requirements-dev.txt` wuxuu qeexayaa versions-ka Pylint, pytest, iyo Flake8
-  ee loo adeegsaday baaritaanka maxalliga ah.
-- Docstrings ayaa lagu daray; imports aan la isticmaalin iyo sadar dheer ayaa la saxay.
-- Query-ga calaamadaha diagnosis-ka waxaa isticmaala helper ay wadaagaan
-  farmer-ka iyo admin-ku.
-- Admin overview iyo reports waxaa loo saaray module u gaar ah; blueprint
-  definitions-ka ayaa laga soocay views-ka si looga saaro circular imports.
-- Inference explanations iyo image encoding waxaa loo kala saaray functions
-  yaryar. Qaab-dhismeedka xogta, qoraalka seed-ka, iyo assertions-kii tests-ka
-  waa la ilaaliyey.
-- Tests-ku waxay wadaagaan fixture leh database iyo upload directory ku meel gaar ah.
+- `requirements-dev.txt` specifies the versions of Pylint, pytest, and Flake8
+  used for local verification.
+- Docstrings were added, unused imports were removed, and long lines were
+  corrected.
+- Diagnosis symptom queries use a shared helper for the farmer and admin
+  views.
+- The admin overview and reports were moved into a separate module. Blueprint
+  definitions were separated from views to eliminate circular imports.
+- Inference explanations and image encoding were split into smaller
+  functions. Data structures, seed text, and test assertions were preserved.
+- Tests share fixtures with a temporary database and upload directory.
 
-Pylint wuxuu hayaa xadka default-ka ee 10/10. Exceptions kooban oo sharaxan
-waxay ku kooban yihiin dataclass records, Flask configuration, iyo temporary
-directories uu unittest maamulo. Checks-ka kale iyo failure status-ku way shaqaynayaan.
+Pylint retains its default 10/10 score threshold. Limited, documented
+exceptions are scoped to dataclass records, Flask configuration, and temporary
+directories managed by unittest. All other checks and failure exit statuses
+remain enabled.
 
-## Baaritaanka maxalliga ah
+## Local verification
 
-Python 3.12 ayaa lagu xaqiijiyey:
+Verified using Python 3.12:
 
 - Pylint 4.1.3: **10.00/10**, exit code **0**.
 - Pytest 9.2.0: **37 passed, 22 subtests passed**.
-- Flake8 7.5.0: syntax iyo undefined-name checks way gudbeen.
-- Git diff whitespace checks iyo workflow YAML validation way gudbeen.
+- Flake8 7.5.0: syntax and undefined-name checks passed.
+- Git diff whitespace checks and workflow YAML validation passed.
 
-Gudaha project-ka, adigoo environment-ka dhaqaajiyey:
+From the project directory, with the virtual environment activated:
 
 ```powershell
 python -m pip install -r requirements-dev.txt
@@ -69,4 +71,5 @@ python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 python -m pytest -q
 ```
 
-GitHub-hosted runs-ku waxay bilaabmayaan marka aad commit-ka cusub push-garayso.
+GitHub-hosted runs will start after you push the new commit.
+

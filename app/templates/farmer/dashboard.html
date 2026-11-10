@@ -1,37 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Farmer dashboard | CropCare Expert{% endblock %}
+{% block title %}Your workspace | CropGuard{% endblock %}
 {% block content %}
-<section class="content-panel p-4 p-lg-5 mb-4">
-  <div class="row align-items-center g-4">
-    <div class="col-lg">
-      <p class="eyebrow mb-2">Farmer dashboard</p>
-      <h1 class="h2">Welcome, {{ user['username'] }}</h1>
-      <p class="lead mb-0">Select a crop and describe what you observe. The system will explain which rules matched.</p>
-    </div>
-    <div class="col-lg-auto">
-      <a class="btn btn-success btn-lg" href="{{ url_for('farmer.crops') }}">Start a diagnosis</a>
-    </div>
-  </div>
-</section>
-<div class="row g-3">
-  <div class="col-md-4">
-    <article class="stat-card h-100">
-      <p class="stat-label">Your diagnoses</p>
-      <p class="stat-value">{{ diagnosis_count }}</p>
-      <a href="{{ url_for('farmer.history') }}">View history</a>
-    </article>
-  </div>
-  <div class="col-md-8">
-    <article class="stat-card h-100">
-      <p class="stat-label">Latest diagnosis</p>
-      {% if latest_diagnosis %}
-        <h2 class="h5">{{ latest_diagnosis['crop_name'] }}{% if latest_diagnosis['disease_name'] %}: {{ latest_diagnosis['disease_name'] }}{% endif %}</h2>
-        <p class="mb-2 text-secondary">{{ latest_diagnosis['created_at'] }} · {{ latest_diagnosis['outcome'].replace('_', ' ')|title }}</p>
-        <a href="{{ url_for('farmer.diagnosis_result', diagnosis_id=latest_diagnosis['id']) }}">Review result</a>
-      {% else %}
-        <p class="mb-0">You have not submitted a diagnosis yet.</p>
-      {% endif %}
-    </article>
-  </div>
-</div>
+<div class="workspace-heading"><div><h1>Welcome, {{ user['username'] }}.</h1><p>Your crop records and next assessment, in one place.</p></div><a class="btn btn-success" href="{{ url_for('farmer.crops') }}">{{ icon('plus', 18) }} New diagnosis</a></div>
+<section class="welcome-panel"><div><h2>What have you noticed in your crops?</h2><p>Choose maize or tomato, then select the symptoms you can see.</p></div><div class="welcome-crops" aria-hidden="true"><img src="{{ url_for('static', filename='images/logos/maize.svg') }}" width="76" height="76" alt=""><img src="{{ url_for('static', filename='images/logos/tomato.svg') }}" width="76" height="76" alt=""></div></section>
+<div class="row g-4 mb-4"><div class="col-md-4"><article class="stat-card"><p class="stat-label">Your diagnoses</p><p class="stat-value">{{ diagnosis_count }}</p><a class="stat-link" href="{{ url_for('farmer.history') }}">View history {{ icon('arrow',16) }}</a></article></div><div class="col-md-8"><article class="content-panel latest-diagnosis"><div><p class="eyebrow">Latest diagnosis</p>{% if latest_diagnosis %}<h2>{{ latest_diagnosis['disease_name'] or ('No stored rule matched' if latest_diagnosis['outcome'] == 'no_match' else 'More observations needed') }}</h2><p>{{ latest_diagnosis['crop_name'] }} / {{ latest_diagnosis['created_at'][:10] }}</p><a class="text-action" href="{{ url_for('farmer.diagnosis_result', diagnosis_id=latest_diagnosis['id']) }}">Review result {{ icon('arrow',16) }}</a>{% else %}<h2>Your first assessment starts here.</h2><p>You have not submitted a diagnosis yet.</p><a class="text-action" href="{{ url_for('farmer.crops') }}">Choose a crop {{ icon('arrow',16) }}</a>{% endif %}</div>{% if latest_diagnosis %}{{ outcome_badge(latest_diagnosis['outcome']) }}{% endif %}</article></div></div>
+{% if recent_diagnoses %}<section class="content-panel"><div class="page-subheading"><h2>Recent assessments</h2><a class="text-action" href="{{ url_for('farmer.history') }}">View all history {{ icon('arrow',16) }}</a></div><div class="table-responsive"><table class="table data-table" data-cards="true"><thead><tr><th>Crop</th><th>Result</th><th>Outcome</th><th>Date</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody>{% for diagnosis in recent_diagnoses %}<tr><td data-label="Crop"><strong>{{ diagnosis['crop_name'] }}</strong><span class="record-meta">CG-{{ diagnosis['id'] }}</span></td><td data-label="Result">{{ diagnosis['disease_name'] or ('No stored rule matched' if diagnosis['outcome'] == 'no_match' else 'More observations needed') }}</td><td data-label="Outcome">{{ outcome_badge(diagnosis['outcome']) }}</td><td data-label="Date">{{ diagnosis['created_at'][:10] }}</td><td data-label="Actions"><a class="text-action" href="{{ url_for('farmer.diagnosis_result', diagnosis_id=diagnosis['id']) }}">View result {{ icon('chevron',15) }}</a></td></tr>{% endfor %}</tbody></table></div></section>{% else %}{{ empty_state('No assessments yet', 'Your crop history will appear after your first assessment.', 'farmer.crops', 'Start a diagnosis') }}{% endif %}
 {% endblock %}

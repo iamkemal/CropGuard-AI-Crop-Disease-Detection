@@ -1,9 +1,3 @@
 {% extends "base.html" %}
-{% block title %}Image too large | CropCare Expert{% endblock %}
-{% block content %}
-<section class="content-panel p-4 p-lg-5 text-center">
-  <p class="eyebrow mb-2">Upload limit</p>
-  <h1 class="h2">That image is too large.</h1>
-  <p class="text-secondary mb-0">Choose an image no larger than 5 MB, then try again.</p>
-</section>
-{% endblock %}
+{% block title %}Image too large | CropGuard{% endblock %}
+{% block content %}<section class="content-panel error-page"><span class="empty-state-icon">{{ icon('image',30) }}</span><p class="eyebrow">Upload limit</p><h1>That image is too large.</h1><p>Choose a JPG, JPEG, PNG, or WEBP image no larger than 5 MB, then try again. You can also take a new camera picture.</p><a class="btn btn-success" href="{{ url_for('farmer.crops' if g.get('user') and g.user['role'] == 'farmer' else 'admin.dashboard' if g.get('user') else 'auth.login') }}">Try again {{ icon('arrow',17) }}</a></section>{% endblock %}

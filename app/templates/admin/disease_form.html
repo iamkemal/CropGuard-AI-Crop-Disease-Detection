@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Edit' if disease else 'Add' }} disease | CropCare Expert{% endblock %}
+{% block title %}{{ 'Edit' if disease else 'Add' }} disease | CropGuard{% endblock %}
 {% block content %}
-<section class="form-panel mx-auto wide-form">
+<section data-editor-panel class="form-panel mx-auto wide-form">
   <p class="eyebrow mb-2">Knowledge base</p>
   <h1 class="h2 mb-4">{{ 'Edit disease' if disease else 'Add disease' }}</h1>
   <form method="post">
@@ -32,7 +32,7 @@
         </div>
       {% endfor %}
     </fieldset>
-    <div class="d-flex flex-wrap gap-2"><button class="btn btn-success" type="submit">Save disease</button><a class="btn btn-outline-secondary" href="{{ url_for('admin.diseases') }}">Cancel</a></div>
+    <div class="d-flex flex-wrap gap-2"><button class="btn btn-success" type="submit">Save disease</button><a class="btn btn-outline-secondary" href="{{ url_for('admin.diseases') }}" data-editor-cancel>Cancel</a></div>
   </form>
 </section>
 {% endblock %}

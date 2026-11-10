@@ -1,0 +1,60 @@
+{% macro icon(name, size=20) -%}
+{% set paths = {
+  'leaf': '<path d="M20 4C10 3 3 7 5 14c2 7 12 6 15-10Z"/><path d="M4 21 15 10"/>',
+  'grid': '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  'plus': '<path d="M12 4v16M4 12h16"/>',
+  'history': '<path d="M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v6l4 2"/>',
+  'users': '<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M17 5a3 3 0 0 1 0 6M19 15a5 5 0 0 1 3 5"/>',
+  'book': '<path d="M12 5c-4-3-8-2-10-1v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-2-10 1ZM12 5v15"/>',
+  'rules': '<path d="M6 5v16M6 9h12v10"/><circle cx="6" cy="3" r="2"/><circle cx="6" cy="21" r="2"/><circle cx="18" cy="21" r="2"/>',
+  'chart': '<path d="M3 3v18h18M7 16v-5m5 5V6m5 10V9"/>',
+  'search': '<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>',
+  'check': '<path d="m5 12 4 4L20 5"/>',
+  'arrow': '<path d="M4 12h16m-6-6 6 6-6 6"/>',
+  'back': '<path d="M20 12H4m6-6-6 6 6 6"/>',
+  'image': '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="2"/><path d="m3 18 6-6 4 4 4-7 4 7"/>',
+  'eye': '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  'lock': '<rect x="4" y="10" width="16" height="12" rx="3"/><path d="M8 10V6a4 4 0 0 1 8 0v4M12 15v3"/>',
+  'info': '<circle cx="12" cy="12" r="10"/><path d="M12 11v6M12 7v.3"/>',
+  'close': '<path d="m6 6 12 12M18 6 6 18"/>',
+  'chevron': '<path d="m9 5 7 7-7 7"/>',
+  'menu': '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  'exit': '<path d="M9 4H3v16h6m4-13 5 5-5 5M7 12h13"/>',
+  'alert': '<path d="m12 2 11 20H1Z"/><path d="M12 8v6m0 3v1"/>',
+  'external': '<path d="M14 3h7v7m0-7L10 14M10 3H3v18h18v-7"/>',
+  'upload': '<path d="M12 16V3m-5 5 5-5 5 5M3 16v5h18v-5"/>'
+} %}
+<svg class="ui-icon" width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ paths.get(name, paths['leaf'])|safe }}</svg>
+{%- endmacro %}
+
+{% macro brand() -%}
+<span class="brand-lockup"><img src="{{ url_for('static', filename='images/brand/cropguard-mark.svg') }}" width="38" height="38" alt=""><span>Crop<strong>Guard</strong><i aria-hidden="true"></i></span></span>
+{%- endmacro %}
+
+{% macro outcome_label(outcome) -%}
+{%- if outcome == 'matched' -%}Possible match
+{%- elif outcome == 'no_match' -%}No match
+{%- else -%}More evidence
+{%- endif -%}
+{%- endmacro %}
+
+{% macro outcome_badge(outcome) -%}
+<span class="status-badge {{ 'status-neutral' if outcome == 'no_match' else 'status-warning' if outcome != 'matched' else 'status-success' }}">{{ outcome_label(outcome) }}</span>
+{%- endmacro %}
+
+{% macro active_badge(active) -%}
+<span class="status-badge {{ 'status-success' if active else 'status-neutral' }}">{{ 'Active' if active else 'Inactive' }}</span>
+{%- endmacro %}
+
+{% macro workspace_link(label, endpoint, glyph, endpoints=[]) -%}
+{% set selected = request.endpoint == endpoint or request.endpoint in endpoints %}
+<a class="workspace-link {{ 'is-active' if selected else '' }}" href="{{ url_for(endpoint) }}" {% if selected %}aria-current="page"{% endif %}>{{ icon(glyph) }}<span>{{ label }}</span></a>
+{%- endmacro %}
+
+{% macro notice(text, tone='info') -%}
+<div class="notice notice-{{ tone }}" role="note">{{ icon('alert' if tone == 'warning' else 'info') }}<span>{{ text }}</span></div>
+{%- endmacro %}
+
+{% macro empty_state(title, description, endpoint='', action='Start a diagnosis', glyph='history') -%}
+<div class="empty-state"><span class="empty-state-icon">{{ icon(glyph, 30) }}</span><h2>{{ title }}</h2><p>{{ description }}</p>{% if endpoint %}<a class="btn btn-success" href="{{ url_for(endpoint) }}">{{ action }} {{ icon('arrow', 18) }}</a>{% endif %}</div>
+{%- endmacro %}

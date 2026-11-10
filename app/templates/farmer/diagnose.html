@@ -1,63 +1,15 @@
 {% extends "base.html" %}
-{% block title %}{{ crop['name'] }} symptoms | CropCare Expert{% endblock %}
+{% block title %}{{ crop['name'] }} symptoms | CropGuard{% endblock %}
 {% block content %}
-<div class="d-flex flex-wrap align-items-center gap-3 mb-4">
-  <img class="crop-logo crop-logo-small" src="{{ url_for('static', filename='images/logos/' ~ crop['logo_filename']) }}" alt="{{ crop['name'] }} crop logo">
-  <div>
-    <p class="eyebrow mb-1">Symptom assessment</p>
-    <h1 class="h2 mb-0">{{ crop['name'] }}</h1>
-  </div>
-</div>
-<form method="post" enctype="multipart/form-data" class="diagnosis-form">
+<form method="post" enctype="multipart/form-data" class="diagnosis-form" data-assessment-wizard data-initial-step="{{ 'review' if request.method == 'POST' and selected_symptoms else 'symptoms' }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <section class="content-panel p-4 mb-4" aria-labelledby="symptoms-heading">
-    <h2 class="h4" id="symptoms-heading">Select all symptoms you can observe</h2>
-    <p class="text-secondary">Choose only symptoms you have seen on the plant. More specific observations help the rules distinguish possible causes.</p>
-    <div class="row g-2">
-      {% for symptom in symptoms %}
-        <div class="col-md-6">
-          <label class="symptom-option">
-            <input class="form-check-input mt-1" type="checkbox" name="symptoms" value="{{ symptom['slug'] }}" {% if symptom['slug'] in selected_symptoms %}checked{% endif %}>
-            <span>
-              <strong>{{ symptom['label'] }}</strong>
-              <span class="d-block small text-secondary">{{ symptom['description'] }}</span>
-            </span>
-          </label>
-        </div>
-      {% else %}
-        <p class="mb-0">No active symptoms are configured for this crop.</p>
-      {% endfor %}
-    </div>
-  </section>
-
-  <section class="content-panel p-4 mb-4" aria-labelledby="image-heading">
-    <h2 class="h4" id="image-heading">Add a crop photo <span class="text-secondary fw-normal">(optional)</span></h2>
-    <p class="text-secondary">A photo is stored with this record for your reference. It is not analyzed by the diagnosis engine.</p>
-    <label class="form-label fw-semibold" for="cropImage" id="plantImageLabel">Plant image</label>
-    <input class="form-control" id="cropImage" name="crop_image" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="photoHelp photoStatus">
-    <div class="photo-actions" id="photoActions" role="group" aria-labelledby="plantImageLabel" hidden>
-      <button class="btn btn-success photo-option" id="takePicture" type="button" aria-haspopup="dialog" aria-controls="cameraDialog">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 4-2 3H3v13h18V7h-3l-2-3Z"/><circle cx="12" cy="13" r="4"/></svg>
-        Take picture
-      </button>
-      <button class="btn btn-outline-success photo-option" id="choosePhoto" type="button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="2"/><path d="m3 18 6-6 4 4 4-7 4 7"/></svg>
-        Choose photo
-      </button>
-    </div>
-    <div class="form-text" id="photoHelp">JPG, JPEG, PNG, or WEBP; maximum 5 MB. Camera access requires your permission.</div>
-    <p class="small mt-2 mb-0" id="photoStatus" role="status" aria-live="polite"></p>
-    <p class="alert alert-danger mt-3 mb-0" id="photoError" role="alert" hidden></p>
-    <div class="image-preview-wrap mt-3" id="imagePreviewWrap" hidden>
-      <img class="image-preview" id="cropImagePreview" alt="Preview of the selected crop photo">
-      <button class="btn btn-sm btn-outline-secondary mt-2" id="removePhoto" type="button">Remove photo</button>
-      <p class="small text-secondary mt-2 mb-0">Preview only; the image does not affect rule matching.</p>
-    </div>
-  </section>
-  <div class="d-flex flex-wrap gap-2">
-    <button class="btn btn-success btn-lg" type="submit">Get symptom-based results</button>
-    <a class="btn btn-outline-secondary btn-lg" href="{{ url_for('farmer.crops') }}">Choose another crop</a>
-  </div>
+  <ol class="assessment-progress" aria-label="Assessment progress"><li class="is-done" data-progress-step="1"><span class="step-number">1</span><span>Crop</span></li><li class="is-current" data-progress-step="2" aria-current="step"><span class="step-number">2</span><span>Symptoms</span></li><li data-progress-step="3"><span class="step-number">3</span><span>Review</span></li></ol>
+  <div class="workspace-heading"><div><div class="wizard-symptom-heading" tabindex="-1"><h1>What do you see on the {{ crop['name']|lower }} plant?</h1><p>Select all symptoms you can confidently identify.</p></div><div class="wizard-review-heading" tabindex="-1"><h1>Review your observations</h1><p>Add a photo for your records, then get symptom-based results.</p></div></div></div>
+  <div class="assessment-grid"><div>
+    <section class="content-panel" data-assessment-step="symptoms" aria-labelledby="symptoms-heading"><div class="symptom-panel-heading"><h2 id="symptoms-heading">Leaf and plant symptoms</h2><span class="status-badge" data-selected-count>{{ selected_symptoms|length }} selected</span></div><div class="row g-3">{% for symptom in symptoms %}<div class="col-md-6"><label class="symptom-option"><input class="form-check-input" type="checkbox" name="symptoms" value="{{ symptom['slug'] }}" data-symptom-label="{{ symptom['label'] }}" {% if symptom['slug'] in selected_symptoms %}checked{% endif %}><span><strong>{{ symptom['label'] }}</strong><span class="d-block small text-secondary">{{ symptom['description'] }}</span></span></label></div>{% else %}<p class="mb-0">No active symptoms are configured for this crop.</p>{% endfor %}</div></section>
+    <section class="content-panel" data-assessment-step="review" aria-labelledby="image-heading"><h2 id="image-heading">Crop photo <span class="text-secondary fw-normal">(optional)</span></h2><p class="photo-description">A photo is stored with this record for your reference. It is not analyzed by the diagnosis engine.</p><div class="upload-zone">{{ icon('upload',32) }}<label class="form-label fw-semibold" for="cropImage" id="plantImageLabel">Add a plant photo</label><input class="form-control" id="cropImage" name="crop_image" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="photoHelp photoStatus"><div class="form-text" id="photoHelp">JPG, JPEG, PNG, or WEBP; maximum 5 MB. Camera access requires your permission.</div><div class="photo-actions" id="photoActions" role="group" aria-labelledby="plantImageLabel" hidden><button class="btn btn-success photo-option" id="takePicture" type="button" aria-haspopup="dialog" aria-controls="cameraDialog"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 4-2 3H3v13h18V7h-3l-2-3Z"/><circle cx="12" cy="13" r="4"/></svg>Take picture</button><button class="btn btn-outline-success photo-option" id="choosePhoto" type="button">{{ icon('image',20) }}Choose photo</button></div></div><p class="small mt-2 mb-0" id="photoStatus" role="status" aria-live="polite"></p><p class="alert alert-danger mt-3 mb-0" id="photoError" role="alert" hidden></p><div class="image-preview-wrap mt-3" id="imagePreviewWrap" hidden><img class="image-preview" id="cropImagePreview" alt="Preview of the selected crop photo"><button class="btn btn-sm btn-outline-secondary mt-2" id="removePhoto" type="button">Remove photo</button><p class="small text-secondary mt-2 mb-0">Preview only; the image does not affect rule matching.</p></div><div class="mt-4">{{ notice('Take or choose a photo. Review the preview before submitting.') }}</div>{% if request.method == 'POST' %}<p class="form-text mt-3">If you attached a photo before, please select it again before resubmitting.</p>{% endif %}</section>
+    <div class="wizard-actions"><button class="btn btn-success" type="button" data-review-next hidden>Continue to review {{ icon('arrow',18) }}</button><button class="btn btn-success" type="submit" data-assessment-submit>Get symptom-based results {{ icon('arrow',18) }}</button><button class="btn btn-outline-secondary" type="button" data-review-back hidden>Back to symptoms</button><a class="btn btn-outline-secondary" href="{{ url_for('farmer.crops') }}">Change crop</a></div>
+  </div><aside class="observation-summary" data-review-summary><img class="crop-logo" src="{{ url_for('static', filename='images/logos/' ~ crop['logo_filename']) }}" width="76" height="76" alt="{{ crop['name'] }} crop logo"><h2>Your observations</h2><p>{{ crop['name'] }}</p><ul data-selected-symptoms>{% for symptom in symptoms if symptom['slug'] in selected_symptoms %}<li>{{ symptom['label'] }}</li>{% else %}<li>No symptoms selected yet.</li>{% endfor %}</ul><button class="btn btn-sm btn-outline-success" type="button" data-edit-observations hidden>Edit observations</button><div class="summary-divider"></div><p>Clear observations help the rules distinguish possible causes.</p></aside></div>
 </form>
 <dialog class="camera-dialog" id="cameraDialog" aria-labelledby="cameraTitle" aria-describedby="cameraStatus">
   <div class="camera-dialog-header">
@@ -77,5 +29,5 @@
     <button class="btn btn-outline-secondary" id="cancelCamera" type="button">Cancel</button>
   </div>
 </dialog>
-<script src="{{ url_for('static', filename='js/upload-preview.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/upload-preview.js', v='camera-1') }}" defer></script>
 {% endblock %}

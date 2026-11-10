@@ -1,23 +1,23 @@
 {% extends "base.html" %}
-{% block title %}Disease management | CropCare Expert{% endblock %}
+{% block title %}Disease management | CropGuard{% endblock %}
 {% block content %}
 <section class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
   <div><p class="eyebrow mb-2">Knowledge base</p><h1 class="h2">Diseases</h1><p class="text-secondary mb-0">Manage descriptions, causes, and associated disease symptoms.</p></div>
-  <a class="btn btn-success" href="{{ url_for('admin.new_disease') }}">Add disease</a>
+  <a class="btn btn-success" href="{{ url_for('admin.new_disease') }}" data-editor-link>Add disease</a>
 </section>
 <div class="table-responsive content-panel p-3">
-  <table class="table align-middle mb-0">
+  <table class="table align-middle mb-0" data-table>
     <thead><tr><th>Disease</th><th>Crop</th><th>Scientific name</th><th>Status</th><th>Actions</th></tr></thead>
     <tbody>
       {% for disease in diseases %}
-        <tr>
+        <tr data-crop="{{ disease['crop_name'] }}" data-status="{{ 'Active' if disease['is_active'] else 'Inactive' }}">
           <td>{{ disease['name'] }}<div class="small text-secondary">{{ disease['slug'] }}</div></td>
           <td>{{ disease['crop_name'] }}</td>
           <td><em>{{ disease['scientific_name'] or '—' }}</em></td>
-          <td>{{ 'Active' if disease['is_active'] else 'Inactive' }}</td>
+          <td>{{ active_badge(disease['is_active']) }}</td>
           <td class="d-flex flex-wrap gap-2">
-            <a class="btn btn-sm btn-outline-success" href="{{ url_for('admin.edit_disease', disease_id=disease['id']) }}">Edit</a>
-            <form method="post" action="{{ url_for('admin.delete_disease', disease_id=disease['id']) }}" onsubmit="return confirm('Delete this disease?');">
+            <a class="btn btn-sm btn-outline-success" href="{{ url_for('admin.edit_disease', disease_id=disease['id']) }}" data-editor-link>Edit</a>
+            <form method="post" action="{{ url_for('admin.delete_disease', disease_id=disease['id']) }}" data-confirm-title="Delete this disease?" data-confirm-description="This action cannot be undone. Records that are in use stay protected.">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
             </form>

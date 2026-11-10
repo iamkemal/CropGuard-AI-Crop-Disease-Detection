@@ -1,20 +1,8 @@
 {% extends "base.html" %}
-{% block title %}About | CropCare Expert{% endblock %}
+{% block title %}About CropGuard{% endblock %}
 {% block content %}
-<section class="content-panel p-4 p-lg-5">
-  <p class="eyebrow mb-2">About the system</p>
-  <h1 class="h2">An explainable, symptom-based expert system</h1>
-  <p class="lead">CropCare Expert compares farmer-selected symptoms with a knowledge base of crop diseases and IF-THEN production rules.</p>
-  <div class="row g-4 mt-2">
-    <div class="col-md-6">
-      <h2 class="h5">How the rules work</h2>
-      <p>Each rule lists required and supporting symptoms. The system reports matched rules, weighted symptom coverage, possible diseases, and cases where evidence is not strong enough.</p>
-    </div>
-    <div class="col-md-6">
-      <h2 class="h5">Images are documentation only</h2>
-      <p>Uploaded crop photographs are not analyzed or sent to an image-recognition model. They are stored with the diagnosis record for the farmer's reference.</p>
-    </div>
-  </div>
-  <div class="alert alert-info mt-3 mb-0" role="note">Results are decision support, not a laboratory-confirmed diagnosis. Seek local agricultural advice when symptoms are severe or unclear.</div>
-</section>
+<section class="about-intro"><div><p class="eyebrow">About CropGuard</p><h1>Practical guidance.<br>Clear reasoning.</h1><p class="lead">CropGuard supports maize and tomato growers in Bosaso with symptom-based disease guidance. Each result shows the observations and rules behind it.</p></div><img src="{{ url_for('static', filename='images/brand/plant-illustration.svg') }}" width="380" height="330" alt="" class="about-illustration"></section>
+<section class="row g-4 about-steps" aria-label="How the assessment works"><div class="col-md-4"><article class="content-panel h-100"><span class="step-index">01</span><h2>Observe</h2><p>Inspect the plant and choose only symptoms you can identify. Clear descriptions help you record what you see.</p></article></div><div class="col-md-4"><article class="content-panel h-100"><span class="step-index">02</span><h2>Compare</h2><p>The system compares your selections with stored IF-THEN rules and ranks possible disease matches.</p></article></div><div class="col-md-4"><article class="content-panel h-100"><span class="step-index">03</span><h2>Decide</h2><p>Review evidence and care guidance. Consult a local agricultural adviser when signs are severe or unclear.</p></article></div></section>
+{{ notice('Photos are optional records. Disease matching uses your symptom selections. A rule-match score describes coverage of stored rules and does not confirm a diagnosis.', 'warning') }}
+<section class="about-details row g-4"><div class="col-md-6"><h2>How the rules work</h2><p>Each rule lists required and supporting symptoms. CropGuard explains the matched rules, weighted symptom coverage, and cases where more evidence is needed.</p></div><div class="col-md-6"><h2>Images are documentation only</h2><p>Uploaded photographs and camera pictures are not analyzed or sent to an image-recognition model. They stay with the private diagnosis record for your reference.</p></div></section>
 {% endblock %}

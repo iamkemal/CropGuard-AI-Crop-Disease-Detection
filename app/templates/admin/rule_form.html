@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Edit' if rule else 'Create' }} rule | CropCare Expert{% endblock %}
+{% block title %}{{ 'Edit' if rule else 'Create' }} rule | CropGuard{% endblock %}
 {% block content %}
-<section class="form-panel mx-auto wide-form">
+<section data-editor-panel class="form-panel mx-auto wide-form">
   <p class="eyebrow mb-2">Inference knowledge base</p>
   <h1 class="h2 mb-4">{{ 'Edit IF-THEN rule' if rule else 'Create IF-THEN rule' }}</h1>
   <form method="post">
@@ -34,7 +34,7 @@
       {% endfor %}
     </fieldset>
     <div class="mb-4 mt-3"><label class="form-label" for="is_active">Status</label><select class="form-select" id="is_active" name="is_active"><option value="1" {% if not rule or rule['is_active'] %}selected{% endif %}>Active</option><option value="0" {% if rule and not rule['is_active'] %}selected{% endif %}>Inactive</option></select></div>
-    <div class="d-flex gap-2"><button class="btn btn-success" type="submit">Save rule</button><a class="btn btn-outline-secondary" href="{{ url_for('admin.rules') }}">Cancel</a></div>
+    <div class="d-flex gap-2"><button class="btn btn-success" type="submit">Save rule</button><a class="btn btn-outline-secondary" href="{{ url_for('admin.rules') }}" data-editor-cancel>Cancel</a></div>
   </form>
 </section>
 {% endblock %}

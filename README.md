@@ -1,6 +1,14 @@
-# Maize and Tomato Rule-Based Disease Expert System
+# CropGuard — Maize and Tomato Disease Guidance
 
 A Flask and SQLite web application for farmers in Bosaso, Puntland. Farmers select crop symptoms to receive ranked, explainable disease possibilities and recommendations. Uploaded photos are stored with diagnosis records for documentation only; they are never analyzed by the inference engine.
+
+## Interface
+
+CropGuard uses the approved evergreen, mint, and maize-gold brand with locally hosted Open Sans and Bootstrap assets. Public pages, account forms, farmer assessments, history, and the administrator workspace share a responsive layout. Farmer assessments offer symptom selection, review, and optional **Take picture** / **Choose photo** controls. Camera access starts only after a request; the existing file upload remains available as a fallback.
+
+History and management tables support search, relevant filters, and pagination of the records the server has already authorised. Administrator create/edit links open as drawers when supported; normal pages and native POST/CSRF validation remain available. The application name changes to **CropGuard**; database locations, accounts, inference rules, and the GitHub repository name remain the same.
+
+See `FRONTEND_UPDATE_GUIDE.md` for applying the frontend update to an existing installation.
 
 ## Features
 

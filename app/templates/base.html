@@ -1,65 +1,106 @@
+{% from "components/ui.html" import icon, brand, workspace_link, notice, outcome_badge, outcome_label, active_badge, empty_state with context %}
+{% set workspace = g.get('user') and request.blueprint in ('farmer', 'admin') %}
+{% set admin_workspace = workspace and g.user['role'] == 'admin' %}
+{% set endpoint = request.endpoint or '' %}
+{% set section_names = {'dashboard': 'Overview', 'crops': 'New diagnosis' if not admin_workspace else 'Crops', 'crop_diagnosis': 'New diagnosis', 'diagnosis_result': 'Diagnosis result', 'history': 'History', 'disease_detail': 'Disease guide', 'users': 'Farmers', 'diseases': 'Diseases', 'symptoms': 'Symptoms', 'rules': 'Rules', 'treatments': 'Recommendations', 'diagnoses': 'Diagnoses', 'diagnosis_detail': 'Diagnosis record', 'reports': 'Reports'} %}
+{% set section_name = section_names.get(endpoint.split('.')[-1], endpoint.split('.')[-1].replace('_', ' ')|title) %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}CropCare Expert{% endblock %}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#166534">
+  <meta name="description" content="CropGuard helps maize and tomato growers compare observed symptoms with explainable disease rules and keep private crop records.">
+  <title>{% block title %}CropGuard{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/brand/cropguard-mark.svg') }}">
+  <link rel="preload" href="{{ url_for('static', filename='fonts/open-sans-variable.ttf') }}" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css', v='cropguard-2') }}">
+  <noscript><style>@media(max-width:991px){.public-menu{display:flex;position:static;flex-wrap:wrap;gap:14px}.public-navigation{flex-wrap:wrap;padding:18px 0}.public-menu-toggle,.mobile-menu-toggle{display:none}.workspace-sidebar{position:static;transform:none;width:100%;height:auto;visibility:visible!important}.workspace-navigation{display:flex;flex-wrap:wrap;gap:4px}.workspace-navigation a{min-height:44px}.sidebar-about,.sidebar-eyebrow,.sidebar-close{display:none}.workspace-shell{display:block}}</style></noscript>
+  <script src="{{ url_for('static', filename='js/ui.js', v='cropguard-2') }}" defer></script>
 </head>
-<body>
-  <nav class="navbar navbar-expand-lg navbar-dark site-nav">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="{{ url_for('home') }}">CropCare Expert</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="mainNavigation">
-        <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-          <a class="nav-link" href="{{ url_for('home') }}">Home</a>
-          <a class="nav-link" href="{{ url_for('about') }}">About</a>
+<body class="{{ 'workspace-page' if workspace else 'public-page' }} {{ 'admin-workspace' if admin_workspace else 'farmer-workspace' if workspace else '' }}">
+  <a class="skip-link" href="#mainContent">Skip to content</a>
+  {% if workspace %}
+  <div class="workspace-shell">
+    <aside class="workspace-sidebar" id="workspaceSidebar" aria-label="Workspace navigation">
+      <div class="sidebar-brand"><a href="{{ url_for('home') }}" aria-label="CropGuard home">{{ brand() }}</a><button type="button" class="icon-button sidebar-close" data-menu-close aria-label="Close navigation">{{ icon('close') }}</button></div>
+      <p class="sidebar-eyebrow">{{ 'Workspace' if admin_workspace else 'Your workspace' }}</p>
+      <nav class="workspace-navigation" aria-label="{{ 'Administrator' if admin_workspace else 'Farmer' }} navigation">
+      {% if admin_workspace %}
+        {{ workspace_link('Overview', 'admin.dashboard', 'grid') }}
+        {{ workspace_link('Farmers', 'admin.users', 'users') }}
+        {{ workspace_link('Crops', 'admin.crops', 'leaf', ['admin.edit_crop']) }}
+        {{ workspace_link('Diseases', 'admin.diseases', 'book', ['admin.new_disease', 'admin.edit_disease']) }}
+        {{ workspace_link('Symptoms', 'admin.symptoms', 'eye', ['admin.new_symptom', 'admin.edit_symptom']) }}
+        {{ workspace_link('Rules', 'admin.rules', 'rules', ['admin.new_rule', 'admin.edit_rule']) }}
+        {{ workspace_link('Recommendations', 'admin.treatments', 'book', ['admin.new_treatment', 'admin.edit_treatment']) }}
+        {{ workspace_link('Diagnoses', 'admin.diagnoses', 'history', ['admin.diagnosis_detail']) }}
+        {{ workspace_link('Reports', 'admin.reports', 'chart') }}
+      {% else %}
+        {{ workspace_link('Overview', 'farmer.dashboard', 'grid') }}
+        {{ workspace_link('New diagnosis', 'farmer.crops', 'plus', ['farmer.crop_diagnosis', 'farmer.diagnosis_result', 'farmer.disease_detail']) }}
+        {{ workspace_link('History', 'farmer.history', 'history') }}
+      {% endif %}
+      </nav>
+      <a class="sidebar-about" href="{{ url_for('about') }}">{{ icon('info', 18) }} About CropGuard</a>
+    </aside>
+    <button class="navigation-backdrop" type="button" data-menu-close aria-label="Close navigation" hidden></button>
+    <div class="workspace-main">
+      <header class="workspace-topbar">
+        <button type="button" class="icon-button mobile-menu-toggle" data-menu-toggle aria-controls="workspaceSidebar" aria-expanded="false" aria-label="Open navigation">{{ icon('menu', 23) }}</button>
+        <p class="workspace-breadcrumb"><span>{{ 'Admin workspace' if admin_workspace else 'Farmer workspace' }}</span><span aria-hidden="true">/</span><strong>{{ section_name }}</strong></p>
+        <div class="account-summary"><span class="account-avatar" aria-hidden="true">{{ g.user['username'][:1]|upper }}{{ g.user['username'].split(' ')[-1][:1]|upper }}</span><span class="account-name">{{ g.user['username'] }}</span><form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="icon-button" type="submit" aria-label="Log out" title="Log out">{{ icon('exit', 20) }}</button></form></div>
+      </header>
+  {% else %}
+    <header class="public-header">
+      <div class="public-navigation">
+        <a class="public-brand" href="{{ url_for('home') }}" aria-label="CropGuard home">{{ brand() }}</a>
+        <button class="icon-button public-menu-toggle" type="button" data-public-menu-toggle aria-controls="publicMenu" aria-expanded="false" aria-label="Open menu">{{ icon('menu', 23) }}</button>
+        <nav class="public-menu" id="publicMenu" aria-label="Main navigation">
+          <a href="{{ url_for('home') }}" {% if endpoint == 'home' %}aria-current="page"{% endif %}>Home</a>
+          <a href="{{ url_for('about') }}" {% if endpoint == 'about' %}aria-current="page"{% endif %}>About</a>
           {% if g.get('user') %}
-            {% if g.user['role'] == 'admin' %}
-              <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin dashboard</a>
-            {% else %}
-              <a class="nav-link" href="{{ url_for('farmer.dashboard') }}">Dashboard</a>
-              <a class="nav-link" href="{{ url_for('farmer.crops') }}">New diagnosis</a>
-              <a class="nav-link" href="{{ url_for('farmer.history') }}">History</a>
-            {% endif %}
-            <form method="post" action="{{ url_for('auth.logout') }}" class="m-0">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="btn btn-sm btn-outline-light" type="submit">Log out</button>
-            </form>
+            <a class="btn btn-success" href="{{ url_for('admin.dashboard' if g.user['role'] == 'admin' else 'farmer.dashboard') }}">Open workspace {{ icon('arrow', 17) }}</a>
+            <form method="post" action="{{ url_for('auth.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-secondary" type="submit">Log out</button></form>
           {% else %}
-            <a class="nav-link" href="{{ url_for('auth.login') }}">Log in</a>
-            <a class="btn btn-sm btn-light text-success fw-semibold" href="{{ url_for('auth.register') }}">Create account</a>
+            <a href="{{ url_for('auth.login') }}" {% if endpoint == 'auth.login' %}aria-current="page"{% endif %}>Log in</a>
+            <a class="btn btn-success" href="{{ url_for('auth.register') }}">Create account</a>
           {% endif %}
-        </div>
+        </nav>
       </div>
-    </div>
-  </nav>
+    </header>
+  {% endif %}
 
-  <main class="container py-4 py-lg-5">
+  <main id="mainContent" class="{{ 'workspace-content' if workspace else 'public-content' }}" tabindex="-1">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <div class="flash-stack mb-4" aria-live="polite">
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-              {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          {% endfor %}
+        <div class="flash-stack" aria-live="polite" id="formMessages" tabindex="-1">
+          {% for category, message in messages %}<div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">{{ icon('check' if category == 'success' else 'info', 20) }}<span>{{ message }}</span><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss message"></button></div>{% endfor %}
         </div>
       {% endif %}
     {% endwith %}
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="site-footer py-4 mt-4">
-    <div class="container text-center small">
-      Symptom-based decision support for maize and tomato growers in Bosaso.
+  {% if workspace %}
     </div>
-  </footer>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </div>
+  <nav class="mobile-bottom-navigation" aria-label="Quick navigation">
+    {% if admin_workspace %}{{ workspace_link('Overview', 'admin.dashboard', 'grid') }}{{ workspace_link('Farmers', 'admin.users', 'users') }}{{ workspace_link('Reports', 'admin.reports', 'chart') }}
+    {% else %}{{ workspace_link('Overview', 'farmer.dashboard', 'grid') }}{{ workspace_link('New diagnosis', 'farmer.crops', 'plus', ['farmer.crop_diagnosis', 'farmer.diagnosis_result']) }}{{ workspace_link('History', 'farmer.history', 'history') }}{% endif %}
+  </nav>
+  {% else %}
+    <footer class="public-footer"><div><a href="{{ url_for('home') }}">CropGuard</a><span>Symptom-based guidance for maize and tomato growers.</span><span>Bosaso, Puntland</span></div></footer>
+  {% endif %}
+
+  {% if workspace %}
+  <dialog class="image-dialog ui-dialog" id="recordImageDialog" aria-labelledby="recordImageTitle"><div class="dialog-heading"><h2 id="recordImageTitle">Attached crop photo</h2><button type="button" class="icon-button" data-close-image aria-label="Close photo">{{ icon('close') }}</button></div><img id="recordImage" alt="Crop documentation attached to this private diagnosis"><p class="small text-secondary mt-3 mb-0">Private documentation. This photo does not affect rule matching.</p></dialog>
+  {% endif %}
+  {% if admin_workspace %}
+  <dialog class="editor-dialog ui-dialog" id="editorDialog" aria-label="Record editor"><div class="editor-dialog-top"><span>Knowledge base</span><button type="button" class="icon-button" data-close-editor aria-label="Close editor">{{ icon('close') }}</button></div><div id="editorContent"></div></dialog>
+  <dialog class="confirm-dialog ui-dialog" id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmDescription"><span class="confirm-symbol">{{ icon('alert', 27) }}</span><h2 id="confirmTitle">Delete this item?</h2><p id="confirmDescription">This action cannot be undone.</p><div class="dialog-actions"><button class="btn btn-outline-secondary" type="button" data-confirm-cancel>Cancel</button><button class="btn btn-danger" type="button" data-confirm-accept>Delete</button></div></dialog>
+  {% endif %}
+  <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}" defer></script>
 </body>
 </html>

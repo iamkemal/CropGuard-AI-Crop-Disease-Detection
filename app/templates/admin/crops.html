@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Crop management | CropCare Expert{% endblock %}
+{% block title %}Crop management | CropGuard{% endblock %}
 {% block content %}
 <section class="mb-4">
   <p class="eyebrow mb-2">Knowledge base</p>
@@ -9,17 +9,17 @@
 <div class="row g-4">
   <div class="col-lg-7">
     <div class="table-responsive content-panel p-3">
-      <table class="table align-middle mb-0">
+      <table class="table align-middle mb-0" data-table>
         <thead><tr><th>Crop</th><th>Logo file</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>
           {% for crop in crops %}
-            <tr>
+            <tr data-status="{{ 'Active' if crop['is_active'] else 'Inactive' }}">
               <td>{{ crop['name'] }}<div class="small text-secondary">{{ crop['slug'] }}</div></td>
               <td>{{ crop['logo_filename'] }}</td>
-              <td>{{ 'Active' if crop['is_active'] else 'Inactive' }}</td>
+              <td>{{ active_badge(crop['is_active']) }}</td>
               <td class="d-flex flex-wrap gap-2">
-                <a class="btn btn-sm btn-outline-success" href="{{ url_for('admin.edit_crop', crop_id=crop['id']) }}">Edit</a>
-                <form method="post" action="{{ url_for('admin.delete_crop', crop_id=crop['id']) }}" onsubmit="return confirm('Delete this crop?');">
+                <a class="btn btn-sm btn-outline-success" href="{{ url_for('admin.edit_crop', crop_id=crop['id']) }}" data-editor-link>Edit</a>
+                <form method="post" action="{{ url_for('admin.delete_crop', crop_id=crop['id']) }}" data-confirm-title="Delete this crop?" data-confirm-description="This action cannot be undone. Records that are in use stay protected.">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
                 </form>

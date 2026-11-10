@@ -34,7 +34,7 @@ def dashboard():
         "SELECT COUNT(*) FROM diagnoses WHERE user_id = ?",
         (user_id,),
     ).fetchone()[0]
-    latest_diagnosis = connection.execute(
+    recent_diagnoses = connection.execute(
         """
         SELECT d.id, d.outcome, d.created_at, c.name AS crop_name,
                candidate.name AS disease_name
@@ -45,15 +45,17 @@ def dashboard():
         LEFT JOIN diseases AS candidate ON candidate.id = dc.disease_id
         WHERE d.user_id = ?
         ORDER BY d.created_at DESC, d.id DESC
-        LIMIT 1
+        LIMIT 3
         """,
         (user_id,),
-    ).fetchone()
+    ).fetchall()
+    latest_diagnosis = recent_diagnoses[0] if recent_diagnoses else None
     return render_template(
         "farmer/dashboard.html",
         user=g.user,
         diagnosis_count=diagnosis_count,
         latest_diagnosis=latest_diagnosis,
+        recent_diagnoses=recent_diagnoses,
     )
 
 

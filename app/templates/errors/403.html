@@ -1,9 +1,3 @@
 {% extends "base.html" %}
-{% block title %}Access denied | CropCare Expert{% endblock %}
-{% block content %}
-<section class="content-panel p-4 p-lg-5 text-center">
-  <p class="eyebrow mb-2">403</p>
-  <h1 class="h2">You do not have access to this page.</h1>
-  <p class="text-secondary mb-0">Sign in with an account that has the required role.</p>
-</section>
-{% endblock %}
+{% block title %}Access denied | CropGuard{% endblock %}
+{% block content %}<section class="content-panel error-page"><span class="empty-state-icon">{{ icon('lock',30) }}</span><p class="eyebrow">403 / Access restricted</p><h1>You cannot open this page.</h1><p>You do not have access to this page. Sign in with an account that has the required role. Private crop records are available to their owner and authorised administrators.</p><a class="btn btn-success" href="{{ url_for('admin.dashboard' if g.get('user') and g.user['role'] == 'admin' else 'farmer.dashboard' if g.get('user') else 'auth.login') }}">{{ 'Back to dashboard' if g.get('user') else 'Log in' }} {{ icon('arrow',17) }}</a></section>{% endblock %}

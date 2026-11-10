@@ -1,25 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Select a crop | CropCare Expert{% endblock %}
+{% block title %}Choose a crop | CropGuard{% endblock %}
 {% block content %}
-<section class="mb-4">
-  <p class="eyebrow mb-2">New diagnosis</p>
-  <h1 class="h2">Which crop needs attention?</h1>
-  <p class="text-secondary">Choose the crop affected by the symptoms you observed.</p>
-</section>
-<div class="row g-3">
-  {% for crop in crops %}
-    <div class="col-md-6">
-      <a class="crop-choice" href="{{ url_for('farmer.crop_diagnosis', crop_slug=crop['slug']) }}">
-        <img class="crop-logo crop-logo-large" src="{{ url_for('static', filename='images/logos/' ~ crop['logo_filename']) }}" alt="{{ crop['name'] }} crop logo">
-        <div>
-          <h2 class="h4">{{ crop['name'] }}</h2>
-          <p class="mb-3">{{ crop['description'] }}</p>
-          <span class="btn btn-success">Select {{ crop['name'] }}</span>
-        </div>
-      </a>
-    </div>
-  {% else %}
-    <div class="col-12"><div class="alert alert-warning">No active crops are available.</div></div>
-  {% endfor %}
-</div>
+<div class="workspace-heading"><div><h1>Which crop are you checking?</h1><p>Choose the plant you observed to see relevant symptoms.</p></div></div>
+<div class="row g-4">{% for crop in crops %}<div class="col-lg-6"><a class="crop-choice" href="{{ url_for('farmer.crop_diagnosis', crop_slug=crop['slug']) }}"><img class="crop-logo crop-logo-large" src="{{ url_for('static', filename='images/logos/' ~ crop['logo_filename']) }}" width="100" height="100" alt="{{ crop['name'] }} crop logo"><div><h2>{{ crop['name'] }}</h2><p>{{ crop['description'] }}</p><span class="btn {{ 'btn-success' if loop.first else 'btn-outline-secondary' }} btn-sm">Check {{ crop['name']|lower }} {{ icon('arrow',16) }}</span></div></a></div>{% else %}<div class="col-12">{{ empty_state('No active crops are available', 'Please return later or ask an administrator to review the available crops.', glyph='leaf') }}</div>{% endfor %}</div>
+<div class="mt-4">{{ notice('Observe the crop closely before choosing symptoms. If you are unsure about a sign, leave it unselected.') }}</div>
+<section class="content-panel crop-workflow-info"><h2>A simple assessment</h2><div class="row g-4"><div class="col-md-4"><h3>Select observations</h3><p>Use the symptom descriptions to guide you.</p></div><div class="col-md-4"><h3>Add a photo if useful</h3><p>Take a picture or choose a photo to keep with your record.</p></div><div class="col-md-4"><h3>Review possible matches</h3><p>Read the reasoning before taking action.</p></div></div></section>
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Diagnosis #{{ diagnosis['id'] }} | CropCare Expert{% endblock %}
+{% block title %}Diagnosis #{{ diagnosis['id'] }} | CropGuard{% endblock %}
 {% block content %}
 <section class="content-panel p-4 p-lg-5 mb-4">
   <p class="eyebrow mb-2">Diagnosis record #{{ diagnosis['id'] }}</p>
@@ -28,7 +28,7 @@
     {% if diagnosis['image_path'] %}
       <section class="content-panel p-3">
         <h2 class="h6">Uploaded crop image</h2>
-        <a href="{{ url_for('admin.diagnosis_image', diagnosis_id=diagnosis['id']) }}"><img class="history-image" src="{{ url_for('admin.diagnosis_image', diagnosis_id=diagnosis['id']) }}" alt="Farmer's uploaded crop documentation"></a>
+        <a href="{{ url_for('admin.diagnosis_image', diagnosis_id=diagnosis['id']) }}" data-image-preview><img class="history-image" src="{{ url_for('admin.diagnosis_image', diagnosis_id=diagnosis['id']) }}" alt="Farmer's uploaded crop documentation"></a>
       </section>
     {% else %}
       <section class="content-panel p-4"><p class="mb-0">No image was uploaded for this diagnosis.</p></section>

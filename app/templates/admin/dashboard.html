@@ -1,48 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Admin dashboard | CropCare Expert{% endblock %}
+{% block title %}Admin overview | CropGuard{% endblock %}
 {% block content %}
-<section class="mb-4">
-  <p class="eyebrow mb-2">Administration</p>
-  <h1 class="h2">System overview</h1>
-  <p class="text-secondary">Administrative access is restricted to provisioned administrator accounts.</p>
-</section>
-<div class="row g-3">
-  <div class="col-sm-4">
-    <article class="stat-card h-100">
-      <p class="stat-label">Farmers</p>
-      <p class="stat-value">{{ counts['users'] }}</p>
-    </article>
-  </div>
-  <div class="col-sm-4">
-    <article class="stat-card h-100">
-      <p class="stat-label">Active diseases</p>
-      <p class="stat-value">{{ counts['diseases'] }}</p>
-    </article>
-  </div>
-  <div class="col-sm-4">
-    <article class="stat-card h-100">
-      <p class="stat-label">Diagnoses</p>
-      <p class="stat-value">{{ counts['diagnoses'] }}</p>
-    </article>
-  </div>
-  <div class="col-sm-4">
-    <article class="stat-card h-100">
-      <p class="stat-label">Active rules</p>
-      <p class="stat-value">{{ counts['rules'] }}</p>
-    </article>
-  </div>
-</div>
-<section class="content-panel p-4 mt-4">
-  <h2 class="h5">Manage the system</h2>
-  <div class="admin-link-grid mt-3">
-    <a href="{{ url_for('admin.users') }}">Registered farmers</a>
-    <a href="{{ url_for('admin.crops') }}">Crops</a>
-    <a href="{{ url_for('admin.diseases') }}">Diseases</a>
-    <a href="{{ url_for('admin.symptoms') }}">Symptoms</a>
-    <a href="{{ url_for('admin.rules') }}">IF-THEN rules</a>
-    <a href="{{ url_for('admin.treatments') }}">Treatments</a>
-    <a href="{{ url_for('admin.diagnoses') }}">Diagnosis records and images</a>
-    <a href="{{ url_for('admin.reports') }}">System reports</a>
-  </div>
-</section>
+<div class="workspace-heading"><div><h1>System overview</h1><p>Manage the knowledge base and review crop assessments.</p></div></div>
+<div class="row g-4 mb-4">{% for label, key in [('Registered farmers','users'),('Active diseases','diseases'),('Diagnoses','diagnoses'),('Active rules','rules')] %}<div class="col-6 col-xl-3"><article class="stat-card"><p class="stat-label">{{ label }}</p><p class="stat-value">{{ counts[key] }}</p></article></div>{% endfor %}</div>
+<div class="row g-4"><div class="col-lg-8"><section class="content-panel h-100"><h2>Knowledge base</h2><div class="admin-link-grid">{% for title, endpoint, glyph, description in [('Crops','admin.crops','leaf','Maize, tomato, and crop details'),('Diseases','admin.diseases','book','Descriptions and associated signs'),('Symptoms','admin.symptoms','eye','Farmer-facing observations'),('IF-THEN rules','admin.rules','rules','Conditions and thresholds'),('Recommendations','admin.treatments','book','Treatment and prevention guidance')] %}<a href="{{ url_for(endpoint) }}">{{ icon(glyph,23) }}<span>{{ title }}<small>{{ description }}</small></span></a>{% endfor %}</div></section></div><div class="col-lg-4"><section class="content-panel h-100"><h2>Record management</h2><ul class="admin-shortcut-list"><li><a href="{{ url_for('admin.users') }}">Registered farmers {{ icon('chevron',17) }}</a></li><li><a href="{{ url_for('admin.diagnoses') }}">Diagnosis records {{ icon('chevron',17) }}</a></li><li><a href="{{ url_for('admin.reports') }}">System reports {{ icon('chevron',17) }}</a></li></ul><div class="mt-4">{{ notice('Use reviewed sources when updating care guidance.') }}</div></section></div></div>
 {% endblock %}

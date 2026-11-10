@@ -1,6 +1,6 @@
 # CropGuard frontend update
 
-This update applies the approved CropGuard brand and Canva layout to the existing Flask application. It was built against repository commit `ff0304a068c3f90439f00bcafdd15dcdbd1b79d5`, which already contains camera capture.
+This update applies the approved CropGuard brand to the existing Flask application. It was built against repository commit `ff0304a068c3f90439f00bcafdd15dcdbd1b79d5`, which already contains camera capture.
 
 ## What changes
 

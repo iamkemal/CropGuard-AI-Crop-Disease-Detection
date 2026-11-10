@@ -188,6 +188,73 @@ body {
   max-width: 24rem;
 }
 
+.photo-actions:not([hidden]) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.photo-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+  min-width: 10rem;
+}
+
+.camera-dialog {
+  width: min(44rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 1.5rem;
+  overflow-y: auto;
+  color: var(--agri-ink);
+  background: #fff;
+  border: 1px solid #dce8dd;
+  border-radius: 1rem;
+}
+
+.camera-dialog::backdrop {
+  background: rgb(15 47 37 / 65%);
+}
+
+.camera-dialog-header,
+.camera-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.camera-dialog-actions {
+  justify-content: flex-end;
+  margin: 1rem 0 0;
+}
+
+.camera-dialog button {
+  min-height: 2.75rem;
+}
+
+.camera-viewport {
+  display: grid;
+  place-items: center;
+  min-height: 12rem;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: var(--agri-green-dark);
+}
+
+.camera-viewport video,
+.camera-viewport img {
+  width: 100%;
+  max-height: min(55dvh, 28rem);
+  object-fit: contain;
+}
+
 .image-preview,
 .history-image {
   display: block;
@@ -240,6 +307,14 @@ body {
 }
 
 @media (max-width: 575.98px) {
+  .photo-option {
+    flex: 1 1 100%;
+  }
+
+  .camera-dialog {
+    padding: 1rem;
+  }
+
   .form-panel {
     padding: 1.5rem;
   }
